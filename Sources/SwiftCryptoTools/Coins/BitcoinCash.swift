@@ -34,6 +34,7 @@ public class BitcoinCash: Bitcoin {
         }
         
         blockExplorer = Fullstack(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
+        priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }
     
     //****************************************
@@ -63,7 +64,16 @@ public class BitcoinCash: Bitcoin {
         }
         
         let pubkeyHash: [UInt8] = Util.shared.sha256hash160(data: pubkey)
-        let cashAddress = CashAddrBech32.encode(Data(pubkeyHash), prefix: cashAddrPrefix)
+        
+        // https://github.com/horizontalsystems/BitcoinCashKit.Swift/blob/master/Sources/BitcoinCashKit/Classes/Bech32/CashBech32AddressConverter.swift
+        var addressType: UInt8 = 0 //addressType.rawValue for pubKeyHash = 0
+        // make version byte use rules in convert address method
+        let sizeOffset = pubkeyHash.count >= 40
+        let divider = sizeOffset ? 8 : 4
+        let size = pubkeyHash.count - (sizeOffset ? 20 : 0) - 20
+        let versionByte = addressType + (sizeOffset ? 1 : 0) << 2 + UInt8(size / divider)
+        print("versionByte: \(versionByte)")
+        let cashAddress = CashAddrBech32.encode(Data([versionByte]) + Data(pubkeyHash), prefix: cashAddrPrefix)
         return cashAddress
         
     }
