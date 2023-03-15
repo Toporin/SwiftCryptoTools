@@ -42,7 +42,7 @@ public class BitcoinCash: Bitcoin {
     //****************************************
     
     public override func pubToAddress(pubkey: [UInt8]) throws -> String {
-            
+
         var bytes: [UInt8]
         if useCompressedAddr {
             if pubkey.count==65 {

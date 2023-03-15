@@ -11,10 +11,10 @@ public class Fullstack: BlockExplorer {
     }
 
     struct JsonResponseBalance: Codable {
-        let success: String
+        let success: Bool
         let balance: Balance
         enum CodingKeys: String, CodingKey {
-            case success, balance = "chain_stats"
+            case success, balance
         }
     }
     
@@ -37,10 +37,11 @@ public class Fullstack: BlockExplorer {
     /// Make network request using async `URLSession` API
     @available(iOS 15.0, *)
     public override func getBalance(addr: String) async throws -> Double {
-        
+        print("in Fullstack getBalance - addr: \(addr)")
         // https://api.fullstack.cash/v5/electrumx/balance/bitcoincash:qzrxy8wdjvd2qkjswuefc6exrjhy55mfpc3m0ap8t4
         // returns {"success":true,"balance":{"confirmed":0,"unconfirmed":0}}
         let urlString: String = self.getUrl() + "/electrumx/balance/" + addr
+        print("urlString: \(urlString)")
         
         guard let url = URL(string: urlString) else {
             throw DataFetcherError.invalidURL
