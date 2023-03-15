@@ -16,7 +16,7 @@ public class Counterparty: Bitcoin {
             coinSymbol = "XCP"
             displayName = "Counterparty"
             slip44 = 0x80000009
-            wifPrefix = 0xb0
+            //wifPrefix = 0xb0 // use same as bitcoin
         }
         
         supportNft = true

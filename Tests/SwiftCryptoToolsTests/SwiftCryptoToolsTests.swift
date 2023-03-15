@@ -310,6 +310,52 @@ final class SwiftCryptoToolsTests: XCTestCase {
         print("===============================\n\n\n")
     }
     
+    /* XCP */
+    func testXcp() throws {
+        
+        let PUBKEY_XCP = [
+            "03b7b3957daedecee4488dcb0b8cf3f3372d64d5c559953d2a2539f55e6474c8ce",
+            "03e5c1e865d21a239c6639e75586df1f0a5e59853694601e78dccb22481fad08c0",
+            "03f21a3b7ff93a4396d886b04b045b8a4dfaa3e13ae169adf36a7390f65af964c0",
+            "035f6cb6545543c6b69ba402e19362a71c9ff58a93f8c2d812e0a6c27c6304e5d2",
+            "03e1d8b41fa14419293b29ad6f98d5bd1827ae21b5f1083a7cc001955db2ee628c",
+        ]
+        
+        let ADDRESS_LEGACY_XCP = [
+            "1Q6QXhpreAW8wDRwaL6jvdEcbbceFMw2mv",
+            "1976pT5yu88hDa7HsQK76tpbyYtPTyN3cF",
+            "1QC6JNGbXdmQFkBp69yFFXdYZKvXtfCeEx",
+            "14Kz6dHFJjJNqj2hvQ84vSzYq78T9pmoWi",
+            "1Lr8JCa936osnV288Jm3LYBKKvvvQJkdfy",
+        ]
+        
+        let ADDRESS_SEGWIT_XCP = [
+            "bc1ql4gf6wjve0enmmsvr0vrv4f0v9cnxzcnhpjnx2",
+            "bc1qtr59h4kqargu5les2as8w2tumqreh58ew2ks5d",
+            "bc1qle37gu93ja9csxndeu7q57g49jf5j4qsckw9g0",
+            "bc1qy3lcdhn4crpev6ppejlt20kzhdg528f3t4wp27",
+            "bc1qmx6deexe6r8vvn775e5hjur78g2q4n5fe0fzyn",
+        ]
+        
+        let PRIVKEY_WIF_XCP = [
+            "KzsYHPmjK3VbtFvRL4PbaEAnUePcgQjJZC1B4RjcR1AXbZbC5Yfu",
+            "L4cWMhJWvJwBFv1WrwfoTZYW4EDrT33KSoYtQEfnruzgNiupUNnq",
+            "L4wZXSWJNr2fWbmf2Pfh1XyFew9tSog65nxUiA6767fhot4kGBeX",
+            "L1Xb8kjGUgT322K2pGpUV3EYzzUucT9hsR34mAphtY1C8RwVqLWP",
+            "KxF9SWjzRygz8DP32RdPhak19aMruJiFBYyavcMXRqQT3rr2n41w",
+        ]
+        
+        let coin = Counterparty(isTestnet: false, apiKeys: [:])
+        print(coin.displayName + " - test_address - START!")
+        XCTAssertEqual("Counterparty", coin.displayName)
+        XCTAssertEqual("XCP", coin.coinSymbol)
+        XCTAssertEqual( true, coin.useCompressedAddr)
+        try doTestCoin(coin: coin, pubkeys: PUBKEY_XCP, addresses: ADDRESS_LEGACY_XCP, privkeys: PRIVKEY_WIF_XCP)
+        print(coin.displayName + " - test_address - FINISH!")
+        print("===============================\n\n\n")
+    }
+    
+    
     //
     //         SUBFUNCTIONS
     //
