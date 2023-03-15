@@ -105,54 +105,32 @@ public class BaseCoin {
     //*          BLOCK EXPLORER METHODS            *
     //**********************************************
     
-//    public func getBalance(addr: String) throws -> Double {
-//        preconditionFailure("This method must be overridden")
-//    }
-    
     @available(iOS 15.0.0, *)
     public func getBalance(addr: String) async throws -> Double {
-        //preconditionFailure("This method must be overridden")
-        do {
-//            let balance = try await blockExplorer?.getBalance(addr: addr)
-//            print ("balance: \(balance)")
-//            return balance
-            if let balance = try await blockExplorer?.getBalance(addr: addr){
-                print ("balance: \(balance)")
-                return balance
-            } else {
-                throw CoinError.FailedToGetBalance
-            }
-        } catch {
+        if let balance = try await blockExplorer?.getBalance(addr: addr){
+            print ("balance: \(balance)")
+            return balance
+        } else {
             throw CoinError.FailedToGetBalance
         }
     }
     
     @available(iOS 15.0.0, *)
     public func getTokenBalance(addr: String, contract: String) async throws -> Double {
-
-        do {
-            if let balance = try await blockExplorer?.getTokenBalance(addr: addr, contract: contract){
-                print ("tokenBalance: \(balance)")
-                return balance
-            } else {
-                throw CoinError.FailedToGetTokenBalance
-            }
-        } catch {
+        if let balance = try await blockExplorer?.getTokenBalance(addr: addr, contract: contract){
+            print ("tokenBalance: \(balance)")
+            return balance
+        } else {
             throw CoinError.FailedToGetTokenBalance
         }
     }
     
     @available(iOS 15.0.0, *)
     public func getTokenInfo(contract: String) async throws -> [String:String] {
-
-        do {
-            if let tokenInfo = try await blockExplorer?.getTokenInfo(contract: contract){
-                print ("tokenInfo: \(tokenInfo)")
-                return tokenInfo
-            } else {
-                throw CoinError.FailedToGetTokenInfo
-            }
-        } catch {
+        if let tokenInfo = try await blockExplorer?.getTokenInfo(contract: contract){
+            print ("tokenInfo: \(tokenInfo)")
+            return tokenInfo
+        } else {
             throw CoinError.FailedToGetTokenInfo
         }
     }
@@ -193,14 +171,10 @@ public class BaseCoin {
     
     @available(iOS 15.0.0, *)
     public func getNftInfo(contract: String, tokenid: String) async throws -> [String:String] {
-        do {
-            if let nftInfo = try await nftExplorer?.getNftInfo(contract: contract, tokenid: tokenid){
-                print ("nftInfo: \(nftInfo)")
-                return nftInfo
-            } else {
-                throw CoinError.FailedToGetNftInfo
-            }
-        } catch {
+        if let nftInfo = try await nftExplorer?.getNftInfo(contract: contract, tokenid: tokenid){
+            print ("nftInfo: \(nftInfo)")
+            return nftInfo
+        } else {
             throw CoinError.FailedToGetNftInfo
         }
     }
@@ -217,17 +191,6 @@ public class BaseCoin {
         } else {
             throw CoinError.FailedToGetExchangeRate
         }
-//
-//        do {
-//            if let rate = try await priceExplorer?.getExchangeRateBetween(otherCoin: otherCoin) {
-//                print ("rate: \(rate)")
-//                return rate
-//            } else {
-//                throw CoinError.FailedToGetExchangeRate
-//            }
-//        } catch {
-//            throw CoinError.FailedToGetExchangeRate
-//        }
     }
     
     @available(iOS 15.0.0, *)
@@ -238,15 +201,5 @@ public class BaseCoin {
         } else {
             throw CoinError.FailedToGetTokenExchangeRate
         }
-//        do {
-//            if let rate = try await priceExplorer?.getTokenExchangeRateBetween(contract: contract, otherCoin: otherCoin) {
-//                print ("rate: \(rate)")
-//                return rate
-//            } else {
-//                throw CoinError.FailedToGetTokenExchangeRate
-//            }
-//        } catch {
-//            throw CoinError.FailedToGetTokenExchangeRate
-//        }
     }
 }
