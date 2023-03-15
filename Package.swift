@@ -15,6 +15,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.0.0")),
+        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift.git", from:"0.10.0"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0"),
     ],
     targets: [
@@ -25,6 +26,8 @@ let package = Package(
             dependencies: ["CryptoSwift", "BigInt"]),
         .testTarget(
             name: "SwiftCryptoToolsTests",
-            dependencies: ["SwiftCryptoTools"]),
+            dependencies: ["SwiftCryptoTools",
+                           .product(name: "secp256k1", package: "secp256k1.swift"),
+            ]),
     ]
 )
