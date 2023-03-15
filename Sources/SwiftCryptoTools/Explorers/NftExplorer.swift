@@ -6,11 +6,11 @@ public class NftExplorer: BaseExplorer {
         super.init(coinSymbol: coinSymbol, apiKeys: apiKeys)
     }
     
-    public func getNftOwnerWeburl(addr: String) -> String {
+    public func getNftOwnerWebLink(addr: String) -> String {
         preconditionFailure("This method must be overridden")
     }
     
-    public func getNftWeburl(contract: String, tokenid: String) -> String {
+    public func getNftWebLink(contract: String, tokenid: String) -> String {
         preconditionFailure("This method must be overridden")
     }
     

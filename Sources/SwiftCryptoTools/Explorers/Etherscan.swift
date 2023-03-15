@@ -30,6 +30,27 @@ public class Etherscan: BlockExplorer {
         }
     }
     
+    public override func getAddressWebLink(addr: String) -> String { // todo: use address instead of addr
+        let webUrl: String
+        if (self.coinSymbol == "ETH"){
+            webUrl = "https://etherscan.io/address/"+addr
+        } else {
+            webUrl = "https://ropsten.etherscan.io/address/"+addr
+        }
+        return webUrl
+    }
+    
+    public override func getTokenWebLink(contract: String) -> String {
+        // https://etherscan.io/token/0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb
+        let webUrl: String
+        if (self.coinSymbol == "ETH"){
+            webUrl = "https://etherscan.io/token/"+contract
+        } else {
+            webUrl = "https://ropsten.etherscan.io/token/"+contract
+        }
+        return webUrl
+    }
+    
     /// Make network request using async `URLSession` API
     @available(iOS 15.0, *)
     public override func getBalance(addr: String) async throws -> Double {

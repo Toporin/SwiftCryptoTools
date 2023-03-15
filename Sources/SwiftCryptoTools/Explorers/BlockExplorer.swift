@@ -6,7 +6,11 @@ public class BlockExplorer: BaseExplorer {
         super.init(coinSymbol: coinSymbol, apiKeys: apiKeys)
     }
     
-    public func getAddressWeburl(addr: String) -> String {
+    public func getAddressWebLink(addr: String) -> String { // todo: use address instead of addr
+        preconditionFailure("This method must be overridden")
+    }
+    
+    public func getTokenWebLink(contract: String) -> String {
         preconditionFailure("This method must be overridden")
     }
     

@@ -13,7 +13,7 @@ public class Rarible: NftExplorer {
 
     struct JsonResponseNftInfo: Codable {
         let name: String
-        let description: String
+        let description: String?
         let content: [ImageInfo]
         enum CodingKeys: String, CodingKey {
             case name, description, content
@@ -29,12 +29,12 @@ public class Rarible: NftExplorer {
         }
     }
     
-    public override func getNftOwnerWeburl(addr: String) -> String {
+    public override func getNftOwnerWebLink(addr: String) -> String {
         // https://rarible.com/user/0xb3f8dae49c7f0e94d434db6088683c12d31a621f/owned
         return "https://rarible.com/user/" + addr + "/owned"
     }
         
-    public override func getNftWeburl(contract: String, tokenid: String) -> String {
+    public override func getNftWebLink(contract: String, tokenid: String) -> String {
         return "https://rarible.com/token/" + contract  + ":" + tokenid
     }
     
@@ -64,8 +64,8 @@ public class Rarible: NftExplorer {
             print("result: \(result)")
         
             nftInfo["nftName"] = result.name
-            nftInfo["nftDescription"] = result.description
-            nftInfo["nftExplorerLink"] = self.getNftWeburl(contract: contract, tokenid: tokenid)
+            nftInfo["nftDescription"] = result.description ?? ""
+            nftInfo["nftExplorerLink"] = self.getNftWebLink(contract: contract, tokenid: tokenid)
             
             // image priority: original > preview > big ?
             for item in result.content {

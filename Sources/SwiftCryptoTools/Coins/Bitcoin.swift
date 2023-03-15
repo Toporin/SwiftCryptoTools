@@ -30,6 +30,7 @@ public class Bitcoin: BaseCoin {
         }
         
         blockExplorer = Blockstream(coinSymbol: coinSymbol, apiKeys: apiKeys)
+        priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }
     
     //****************************************

@@ -18,12 +18,12 @@ public class Opensea: NftExplorer {
         return "https://api.opensea.io/api/v1/"
     }
     
-    public override func getNftOwnerWeburl(addr: String) -> String {
+    public override func getNftOwnerWebLink(addr: String) -> String {
         // https://opensea.io/0x800b4dbcef65cb5d1b2f8e33d5d0bbcbffea2a8e
         return "https://opensea.io/" + addr
     }
         
-    public override func getNftWeburl(contract: String, tokenid: String) -> String {
+    public override func getNftWebLink(contract: String, tokenid: String) -> String {
         return "https://opensea.io/assets/" + contract  + "/" + tokenid
     }
     
@@ -54,7 +54,7 @@ public class Opensea: NftExplorer {
         
         nftInfo["nftName"] = result.name
         nftInfo["nftDescription"] = result.description
-        nftInfo["nftExplorerLink"] = self.getNftWeburl(contract: contract, tokenid: tokenid)
+        nftInfo["nftExplorerLink"] = self.getNftWebLink(contract: contract, tokenid: tokenid)
         nftInfo["nftImageUrl"] = result.image_thumbnail_url
         nftInfo["nftImageUrlLarge"] = result.image_url
         if result.image_thumbnail_url != nil {

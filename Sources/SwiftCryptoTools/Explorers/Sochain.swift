@@ -24,7 +24,7 @@ public class Sochain: BlockExplorer {
         return "https://chain.so/api/v2/"
     }
     
-    public override func getAddressWeburl(addr: String) -> String {
+    public override func getAddressWebLink(addr: String) -> String {
         return "https://chain.so/address/" + self.coinSymbol + "/" + addr
     }
     

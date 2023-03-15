@@ -43,8 +43,12 @@ public class XchainBlockExplorer: BlockExplorer {
         }
     }
     
-    public override func getAddressWeburl(addr: String) -> String {
+    public override func getAddressWebLink(addr: String) -> String {
         return self.getUrl() + "address/" + addr
+    }
+    
+    public override func getTokenWebLink(contract contract: String) -> String {
+        return self.getUrl() + "asset/" + contract
     }
     
     /// Make network request using async `URLSession` API
@@ -89,7 +93,7 @@ public class XchainBlockExplorer: BlockExplorer {
         let result = try JSONDecoder().decode(JsonResponseTokenBalance.self, from: data)
         print("result: \(result)")
         
-        var balanceString: String? = nil
+        var balanceString: String? = "0"
         for item in result.data {
             if item.asset == contract {
                 balanceString = item.quantity

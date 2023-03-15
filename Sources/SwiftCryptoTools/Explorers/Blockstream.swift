@@ -26,7 +26,7 @@ public class Blockstream: BlockExplorer {
         }
     }
     
-    public override func getAddressWeburl(addr: String) -> String {
+    public override func getAddressWebLink(addr: String) -> String {
         if self.coinSymbol == "BTC" {
             return "https://blockstream.info/address/"+addr
         } else {

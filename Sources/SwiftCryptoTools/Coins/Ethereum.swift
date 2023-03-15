@@ -25,6 +25,7 @@ public class Ethereum: BaseCoin {
         supportNft = true
         blockExplorer = Etherscan(coinSymbol: coinSymbol, apiKeys: apiKeys)
         nftExplorer = Rarible(coinSymbol: self.coinSymbol, apiKeys: apiKeys) // opensea or rarible
+        priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }
     
     //****************************************
@@ -55,23 +56,53 @@ public class Ethereum: BaseCoin {
         return contractString
     }
     
+    public class override func contractStringToBytes(contractString: String) throws -> [UInt8] {
+        var contractStr = contractString
+        print("contractStr: \(contractStr)")
+        let pattern = #"^(0x)?[0-9a-fA-F]{40}$"# //"^(0x)?[0-9a-fA-F]{40}$"
+        if !contractStr.matches(pattern: pattern) {
+            print("contractStr \(contractStr) does not match regex!")
+            throw ContractParsingError.HexFormatError
+        } else {
+            print("contractStr \(contractStr) matches regex!")
+        }
+        print("\n\n\n")
+        if contractStr.hasPrefix("0x"){
+            contractStr = String(contractStr.dropFirst(2))
+        }
+        let contractBytes: [UInt8] = contractStr.hexToBytes
+        if (contractBytes.count > 20) {
+            throw ContractParsingError.TooLongError
+        }
+        return contractBytes
+    }
+    
     public override func tokenidBytesToString(tokenidBytes: [UInt8]) -> String {
-        
-        // debug
-        let uint1: [UInt8] = [0x0, 0x0, 0x0, 0x1]
-        let bigint1 = BigUInt(Data(uint1))
-        print("DEBUG bigint1: \(bigint1.description)")
-        print("DEBUG bigint1: \(bigint1)")
-        
-        let uint2: [UInt8] = [0x1, 0x0, 0x0, 0x0]
-        let bigint2 = BigUInt(Data(uint2))
-        print("DEBUG bigint2: \(bigint2.description)")
-        print("DEBUG bigint2: \(bigint2)")
-        //endbug
-        
         let biguint: BigUInt = BigUInt(Data(tokenidBytes))
         print("biguint: \(biguint.description)")
         return biguint.description
+    }
+    
+    public class override func tokenidStringToBytes(tokenidString: String) throws -> [UInt8]{
+        // tokenid is in decimal format
+        print("tokenidString: \(tokenidString)")
+        if tokenidString == "" {
+            return [UInt8]()
+        }
+        
+        let pattern = #"^\d+$"#
+        if !tokenidString.matches(pattern: pattern) {
+            throw ContractParsingError.DecimalFormatError
+        }
+        
+        let biguint: BigUInt = BigUInt(stringLiteral: tokenidString)
+        // todo: check 
+        let tokenidBytes = [UInt8](biguint.serialize())
+        print("tokenidBytes: \(tokenidBytes)")
+        if tokenidBytes.count > 32 {
+            throw ContractParsingError.TooLongError
+        }
+        return tokenidBytes
     }
     
 }

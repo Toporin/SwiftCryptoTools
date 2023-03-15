@@ -23,6 +23,7 @@ public class Litecoin: Bitcoin {
         }
         
         blockExplorer = Sochain(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
+        priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }    
 }
 

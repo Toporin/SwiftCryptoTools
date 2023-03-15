@@ -26,7 +26,7 @@ public class Fullstack: BlockExplorer {
         }
     }
     
-    public override func getAddressWeburl(addr: String) -> String {
+    public override func getAddressWebLink(addr: String) -> String {
         if self.coinSymbol == "BCH" {
             return "https://www.blockchain.com/bch/address/" + addr
         } else {

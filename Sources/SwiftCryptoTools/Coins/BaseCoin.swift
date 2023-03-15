@@ -6,6 +6,18 @@ public enum CoinError: Error {
     case FailedToGetTokenBalance
     case FailedToGetTokenInfo
     case FailedToGetNftInfo
+    case FailedToGetExchangeRate
+    case FailedToGetTokenExchangeRate
+}
+
+public enum ContractParsingError: Error {
+    case HexFormatError
+    case TooLongError
+    case TooShortError
+    case DecimalFormatError
+    case XcpSubassetFormatError
+    case XcpNumericAssetOutOfBound
+    case XcpAssetFormatError
 }
 
 public class BaseCoin {
@@ -22,7 +34,7 @@ public class BaseCoin {
     public var supportNft: Bool = false
     public var blockExplorer: BlockExplorer? = nil
     public var nftExplorer: NftExplorer? = nil
-    //var priceExplorer: PriceExplorer = nil
+    public var priceExplorer: PriceExplorer? = nil
     public var apiKeys: [String: String] = [:]
 
     public var isTestnet: Bool
@@ -42,6 +54,7 @@ public class BaseCoin {
         } else {
             wifPrefix = 0x80
         }
+        
     }
     
     //****************************************
@@ -73,9 +86,19 @@ public class BaseCoin {
         return ""
     }
     
+    public class func contractStringToBytes(contractString: String) throws -> [UInt8] {
+        // valid by default
+        return [UInt8]()
+    }
+    
     public func tokenidBytesToString(tokenidBytes: [UInt8]) -> String {
         //preconditionFailure("This method must be overridden")
         return ""
+    }
+    
+    public class func tokenidStringToBytes(tokenidString: String) throws -> [UInt8] {
+        // valid by default
+        return [UInt8]()
     }
     
     //**********************************************
@@ -134,12 +157,24 @@ public class BaseCoin {
         }
     }
     
+    public func getAddressWebLink(address: String) -> String? {
+        return blockExplorer?.getAddressWebLink(addr: address)
+    }
+    
+    public func getTokenWebLink(contract: String) -> String? {
+        if !self.supportToken {
+            return nil
+        } else {
+            return blockExplorer?.getTokenWebLink(contract: contract)
+        }
+    }
+    
     //**********************************************
     //*            NFT EXPLORER METHODS            *
     //**********************************************
     
-    public func getNftOwnerWeburl(addr: String) -> String {
-        if let url = nftExplorer?.getNftOwnerWeburl(addr: addr){
+    public func getNftOwnerWebLink(addr: String) -> String {
+        if let url = nftExplorer?.getNftOwnerWebLink(addr: addr){
             print ("url: \(url)")
             return url
         } else {
@@ -147,8 +182,8 @@ public class BaseCoin {
         }
     }
     
-    public func getNftWeburl(contract: String, tokenid: String) -> String {
-        if let url = nftExplorer?.getNftWeburl(contract: contract, tokenid: tokenid){
+    public func getNftWebLink(contract: String, tokenid: String) -> String {
+        if let url = nftExplorer?.getNftWebLink(contract: contract, tokenid: tokenid){
             print ("url: \(url)")
             return url
         } else {
@@ -173,4 +208,45 @@ public class BaseCoin {
     //**********************************************
     //*          PRICE EXPLORER METHODS            *
     //**********************************************
+    
+    @available(iOS 15.0.0, *)
+    public func getExchangeRateBetween(otherCoin: String) async throws -> Double {
+        if let rate = try await priceExplorer?.getExchangeRateBetween(otherCoin: otherCoin) {
+            print ("rate: \(rate)")
+            return rate
+        } else {
+            throw CoinError.FailedToGetExchangeRate
+        }
+//
+//        do {
+//            if let rate = try await priceExplorer?.getExchangeRateBetween(otherCoin: otherCoin) {
+//                print ("rate: \(rate)")
+//                return rate
+//            } else {
+//                throw CoinError.FailedToGetExchangeRate
+//            }
+//        } catch {
+//            throw CoinError.FailedToGetExchangeRate
+//        }
+    }
+    
+    @available(iOS 15.0.0, *)
+    public func getTokenExchangeRateBetween(contract: String, otherCoin: String) async throws -> Double {
+        if let rate = try await priceExplorer?.getTokenExchangeRateBetween(contract: contract, otherCoin: otherCoin) {
+            print ("rate: \(rate)")
+            return rate
+        } else {
+            throw CoinError.FailedToGetTokenExchangeRate
+        }
+//        do {
+//            if let rate = try await priceExplorer?.getTokenExchangeRateBetween(contract: contract, otherCoin: otherCoin) {
+//                print ("rate: \(rate)")
+//                return rate
+//            } else {
+//                throw CoinError.FailedToGetTokenExchangeRate
+//            }
+//        } catch {
+//            throw CoinError.FailedToGetTokenExchangeRate
+//        }
+    }
 }

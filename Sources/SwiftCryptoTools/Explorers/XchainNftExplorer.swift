@@ -38,11 +38,11 @@ public class XchainNftExplorer: NftExplorer {
         }
     }
     
-    public override func getNftOwnerWeburl(addr: String) -> String {
+    public override func getNftOwnerWebLink(addr: String) -> String {
         return self.getUrl() + "address/" + addr
     }
         
-    public override func getNftWeburl(contract: String, tokenid: String) -> String {
+    public override func getNftWebLink(contract: String, tokenid: String) -> String {
         return self.getUrl() + "asset/" + contract
     }
     
@@ -53,7 +53,7 @@ public class XchainNftExplorer: NftExplorer {
         nftInfo["nftName"] = contract
         nftInfo["nftDescription"] = ""
         nftInfo["nftImageUrl"] = ""
-        nftInfo["nftExplorerLink"] = self.getNftWeburl(contract: contract, tokenid: "")
+        nftInfo["nftExplorerLink"] = self.getNftWebLink(contract: contract, tokenid: "")
         
         // tokenid is not used...
         let urlString: String = self.getUrl() + "api/asset/" + contract

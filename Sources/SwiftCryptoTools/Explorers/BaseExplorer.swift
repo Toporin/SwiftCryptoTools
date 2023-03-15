@@ -3,6 +3,7 @@ import Foundation
 enum DataFetcherError: Error {
     case invalidURL
     case missingData
+    case unsupportedCoin(coin: String)
 }
 
 public class BaseExplorer {
