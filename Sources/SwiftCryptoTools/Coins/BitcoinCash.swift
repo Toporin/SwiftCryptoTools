@@ -42,7 +42,7 @@ public class BitcoinCash: Bitcoin {
     //****************************************
     
     public override func pubToAddress(pubkey: [UInt8]) throws -> String {
-
+        //print("in BitcoinCash pubToAddress pubkey: \(pubkey.bytesToHex)")
         var bytes: [UInt8]
         if useCompressedAddr {
             if pubkey.count==65 {
@@ -63,7 +63,7 @@ public class BitcoinCash: Bitcoin {
             }
         }
         
-        let pubkeyHash: [UInt8] = Util.shared.sha256hash160(data: pubkey)
+        let pubkeyHash: [UInt8] = Util.shared.sha256hash160(data: bytes)
         
         // https://github.com/horizontalsystems/BitcoinCashKit.Swift/blob/master/Sources/BitcoinCashKit/Classes/Bech32/CashBech32AddressConverter.swift
         var addressType: UInt8 = 0 //addressType.rawValue for pubKeyHash = 0
@@ -72,10 +72,9 @@ public class BitcoinCash: Bitcoin {
         let divider = sizeOffset ? 8 : 4
         let size = pubkeyHash.count - (sizeOffset ? 20 : 0) - 20
         let versionByte = addressType + (sizeOffset ? 1 : 0) << 2 + UInt8(size / divider)
-        print("versionByte: \(versionByte)")
+        //print("versionByte: \(versionByte)")
         let cashAddress = CashAddrBech32.encode(Data([versionByte]) + Data(pubkeyHash), prefix: cashAddrPrefix)
         return cashAddress
-        
     }
     
 }
