@@ -1,5 +1,8 @@
 import Foundation
 
+// DEPRECATED
+// Sochain updated its API to v3, which requires an API key
+// Use BlockCypher instead
 public class Sochain: BlockExplorer {
     
     struct Data: Codable {
@@ -31,8 +34,9 @@ public class Sochain: BlockExplorer {
     /// Make network request using async `URLSession` API
     @available(iOS 15.0, *)
     public override func getBalance(addr: String) async throws -> Double {
-        
+        print("in Sochain getBalance - addr: \(addr)")
         let urlString: String = self.getUrl() + "get_address_balance/" + self.coinSymbol + "/" + addr
+        print("urlString: \(urlString)")
         
         guard let url = URL(string: urlString) else {
             throw DataFetcherError.invalidURL
