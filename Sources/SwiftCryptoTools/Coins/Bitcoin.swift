@@ -1,4 +1,5 @@
 import Foundation
+import CryptoSwift
 
 public class Bitcoin: BaseCoin {
     
@@ -78,6 +79,63 @@ public class Bitcoin: BaseCoin {
         print("pubToSegwitAddress encoded: \(encoded)")
         return encoded
     }
+    
+    //****************************************
+    //*          SCRIPT ENCODING             *
+    //****************************************
+    
+    /*
+     Convert a hash to the new segwit address format outlined in BIP-0173
+     */
+    public func hashToSegwitAddr(hash: [UInt8]) throws -> String {
+        let encoded = try SegWitBech32.encode(hrp: segwitHrp, version: 0, program: Data(hash))
+        print("hashToSegwitAddr encoded: \(encoded)")
+        return encoded
+    }
+    
+    /*
+     Convert a script to the new segwit address format outlined in BIP01743
+    */
+    public func scriptToP2wsh(script: [UInt8]) throws -> String {
+        let hashBytes = Digest.sha256(script)
+        return try self.hashToSegwitAddr(hash: hashBytes)
+    }
+    /*
+      Convert an output p2sh script to an address
+     */
+    public func p2shScriptToAddr(script: [UInt8]) -> String {
+        
+        let hash160Bytes = Util.shared.sha256hash160(data: script)
+        let addr = Base58.encodeChecked(version: UInt8(self.scriptMagicbyte), payload: hash160Bytes)
+        return addr
+        //return hex_to_b58check(hash160(script), self.scriptMagicbyte)
+    }
+    
+    /*
+    Convert an input public key hash to an address
+    */
+    public func scriptToAddr(script: [UInt8]) -> String {
+        let addr: String
+        let scriptHex = script.bytesToHex
+        if scriptHex.hasPrefix("76a914") && scriptHex.hasSuffix("88ac") && script.count == 25 {
+            var scriptTrimmed = Array(script.dropFirst(3))
+            scriptTrimmed = Array(script.dropLast(2))
+            addr = Base58.encodeChecked(version: UInt8(self.magicbyte), payload: scriptTrimmed)
+        }
+        else {
+            // BIP0016 scripthash addresses
+            var scriptTrimmed = Array(script.dropFirst(2))
+            scriptTrimmed = Array(script.dropLast(1))
+            addr = Base58.encodeChecked(version: UInt8(self.scriptMagicbyte), payload: scriptTrimmed)
+        }
+        return addr
+//        if (Array(script[..<3]) == "76a914".hexToBytes) && (Array(script[-2...]) == "88ac".hexToBytes) && script.count == 25 {}
+//        if script[:3] == b'\x76\xa9\x14' and script[-2:] == b'\x88\xac' and len(script) == 25:
+//                return bin_to_b58check(script[3:-2], self.magicbyte)  # pubkey hash addresses
+//        else:
+//                return bin_to_b58check(script[2:-1], self.script_magicbyte)
+    }
+    
     
 }
 
