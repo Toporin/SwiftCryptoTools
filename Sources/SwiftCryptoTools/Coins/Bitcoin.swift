@@ -117,15 +117,19 @@ public class Bitcoin: BaseCoin {
     public func scriptToAddr(script: [UInt8]) -> String {
         let addr: String
         let scriptHex = script.bytesToHex
-        if scriptHex.hasPrefix("76a914") && scriptHex.hasSuffix("88ac") && script.count == 25 {
+        print("scriptHex: \(scriptHex)")
+        print("script.count: \(script.count)")
+        if scriptHex.hasPrefix("76A914") && scriptHex.hasSuffix("88AC") && script.count == 25 {
+            print("scriptToAddr P2PKH")
             var scriptTrimmed = Array(script.dropFirst(3))
-            scriptTrimmed = Array(script.dropLast(2))
+            scriptTrimmed = Array(scriptTrimmed.dropLast(2))
             addr = Base58.encodeChecked(version: UInt8(self.magicbyte), payload: scriptTrimmed)
         }
         else {
             // BIP0016 scripthash addresses
+            print("scriptToAddr P2SH")
             var scriptTrimmed = Array(script.dropFirst(2))
-            scriptTrimmed = Array(script.dropLast(1))
+            scriptTrimmed = Array(scriptTrimmed.dropLast(1))
             addr = Base58.encodeChecked(version: UInt8(self.scriptMagicbyte), payload: scriptTrimmed)
         }
         return addr
