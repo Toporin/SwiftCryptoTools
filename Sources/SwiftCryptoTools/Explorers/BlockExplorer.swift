@@ -30,5 +30,10 @@ public class BlockExplorer: BaseExplorer {
         preconditionFailure("This method must be overridden")
     }
     
+    @available(iOS 15.0.0, *)
+    public func getTxInfo(txHash: String, index: Int) async throws -> (script: String, value: UInt64) {
+        preconditionFailure("This method must be overridden")
+    }
+    
 }
  
