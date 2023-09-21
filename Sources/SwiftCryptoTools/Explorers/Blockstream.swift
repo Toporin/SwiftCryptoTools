@@ -60,6 +60,12 @@ public class Blockstream: BlockExplorer {
         let balance: Double = Double(fundedTxoSum-spentTxoSum)/Double(100_000_000)
         return balance
     }
+    
+    @available(iOS 15.0.0, *)
+    public override func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
+        // no token supported
+        return [[String:String]]()
+    }
 
 //    {"txid":"667ba3ad5d55a609e48fb9eb91adf501891ce25b78dc9b253fe8813cc86cd029","version":2,"locktime":2431023,"vin":[{"txid":"8bb6f31589c93e228dfaeecf5c50d1258aaa82c26b493c7e2cef293bdf8b6c95","vout":1,"prevout":{"scriptpubkey":"00142835fdeb06149bc0c01c65f789ae7526cc4faf51","scriptpubkey_asm":"OP_0 OP_PUSHBYTES_20 2835fdeb06149bc0c01c65f789ae7526cc4faf51","scriptpubkey_type":"v0_p2wpkh","scriptpubkey_address":"tb1q9q6lm6cxzjdupsquvhmcntn4ymxylt63we8e00","value":249998900},"scriptsig":"","scriptsig_asm":"","witness":["3044022040992707014e4023bb75cc7da93cd81d6b336c569b4dd35fd5d457aa6d6c90d3022032f8583f3d89226df2e576c31cb996f2340844fd5c82d5aee5fd7f1df60d471701","03dbadd193076ba39a94bacf3721e0f9ac7b07fb0be7fce46357bf29c169404f23"],"is_coinbase":false,"sequence":4294967293}],"vout":[{"scriptpubkey":"76a91460910a50647806bd2f06189b84f7696e613614f888ac","scriptpubkey_asm":"OP_DUP OP_HASH160 OP_PUSHBYTES_20 60910a50647806bd2f06189b84f7696e613614f8 OP_EQUALVERIFY OP_CHECKSIG","scriptpubkey_type":"p2pkh","scriptpubkey_address":"mpKYv3c1UMCd1kig4oLAynx17tpJF3MDQK","value":100000000},{"scriptpubkey":"0014f433682fda86ed139f3b93a8efed6a7cbb48e586","scriptpubkey_asm":"OP_0 OP_PUSHBYTES_20 f433682fda86ed139f3b93a8efed6a7cbb48e586","scriptpubkey_type":"v0_p2wpkh","scriptpubkey_address":"tb1q7sekst76smk388emjw5wlmt20ja53evxxvy7rc","value":149998600}],"size":225,"weight":573,"fee":300,"status":{"confirmed":true,"block_height":2431024,"block_hash":"0000000017db674b3bc936ffc416ce997e2c525c0b61198957fd984e24bfe7ff","block_time":1682428574}}
 

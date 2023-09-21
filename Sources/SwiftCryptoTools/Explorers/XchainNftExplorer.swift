@@ -47,12 +47,26 @@ public class XchainNftExplorer: NftExplorer {
     }
     
     @available(iOS 15.0.0, *)
+    public override func getNftList(addr: String, contract: String) async throws -> [[String:String]] {
+        // ignore tokenId for Counterparty
+        // we assume addr does possess the NFT assset, as provided by getAssetList(addr: String)
+        let nftInfo = try await self.getNftInfo(contract: contract, tokenid: "")
+        if nftInfo["nftImageUrl"] != nil{
+            return [nftInfo]
+        } else {
+            // only returns if nft...
+            return []
+        }
+    }
+    
+    @available(iOS 15.0.0, *)
     public override func getNftInfo(contract: String, tokenid: String) async throws -> [String:String] {
         
         var nftInfo: [String:String] = [:]
-        nftInfo["nftName"] = contract
-        nftInfo["nftDescription"] = ""
-        nftInfo["nftImageUrl"] = ""
+        nftInfo["name"] = contract
+        nftInfo["contract"] = contract
+        //nftInfo["nftDescription"] = ""
+        //nftInfo["nftImageUrl"] = ""
         nftInfo["nftExplorerLink"] = self.getNftWebLink(contract: contract, tokenid: "")
         
         // tokenid is not used...
@@ -117,6 +131,9 @@ public class XchainNftExplorer: NftExplorer {
             }
         } catch {
             print("Error: \(error)")
+        }
+        if nftInfo["nftImageUrl"] != nil {
+            nftInfo["type"] = "nft"
         }
         return nftInfo
     }

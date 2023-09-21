@@ -11,6 +11,7 @@ public class Ethereum: BaseCoin {
         
         useCompressedAddr = false
         
+        // todo: switch to goerli
         if (isTestnet){
             coinSymbol = "ROP"
             displayName = "Ropsten Testnet"
@@ -23,7 +24,8 @@ public class Ethereum: BaseCoin {
         
         supportToken = true
         supportNft = true
-        blockExplorer = Etherscan(coinSymbol: coinSymbol, apiKeys: apiKeys)
+        //blockExplorer = Etherscan(coinSymbol: coinSymbol, apiKeys: apiKeys)
+        blockExplorer = Ethplorer(coinSymbol: coinSymbol, apiKeys: apiKeys)
         nftExplorer = Rarible(coinSymbol: self.coinSymbol, apiKeys: apiKeys) // opensea or rarible
         priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }

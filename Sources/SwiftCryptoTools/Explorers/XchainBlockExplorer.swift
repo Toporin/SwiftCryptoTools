@@ -1,4 +1,5 @@
 import Foundation
+import BigInt
 
 public class XchainBlockExplorer: BlockExplorer {
     
@@ -28,6 +29,12 @@ public class XchainBlockExplorer: BlockExplorer {
         }
     }
     
+    public var nftExplorer: XchainNftExplorer
+    
+    public override init(coinSymbol: String, apiKeys: [String:String]){
+        self.nftExplorer = XchainNftExplorer(coinSymbol: coinSymbol, apiKeys: apiKeys)
+        super.init(coinSymbol: coinSymbol, apiKeys: apiKeys)
+    }
     
     public func getUrl() -> String {
         if self.coinSymbol == "XCP" {
@@ -47,7 +54,7 @@ public class XchainBlockExplorer: BlockExplorer {
         return self.getUrl() + "address/" + addr
     }
     
-    public override func getTokenWebLink(contract contract: String) -> String {
+    public override func getTokenWebLink(contract: String) -> String {
         return self.getUrl() + "asset/" + contract
     }
     
@@ -75,6 +82,131 @@ public class XchainBlockExplorer: BlockExplorer {
         let balance: Double = Double(result.xcpBalance)!
         return balance
     }
+    
+    @available(iOS 15.0.0, *)
+    public override func getAssetList(addr: String) async throws -> [String:[[String:String]]] {
+        print("in XchainBlockExplorer getAssetList - addr: \(addr)")
+        
+        let urlString: String = self.getUrl() + "api/balances/" +  addr
+        guard let url = URL(string: urlString) else {
+            throw DataFetcherError.invalidURL
+        }
+        
+        // Use the async variant of URLSession to fetch data
+        let (data, _) = try await URLSession.shared.data(from: url)
+        
+        // Parse the JSON data
+        let result = try JSONDecoder().decode(JsonResponseTokenBalance.self, from: data)
+        print("result: \(result)")
+        
+        var assetList: [String:[[String:String]]] = [:]
+        assetList["coin"]=[]
+        assetList["token"]=[]
+        assetList["nft"]=[]
+        
+        for item in result.data {
+            var assetType: String = "token"
+            var assetData: [String:String] = [:]
+            //assetData["asset"] = item.asset
+            assetData["balance"] = item.quantity
+            // tokenInfo
+            do {
+                var tokenInfo = try await self.getTokenInfo(contract: item.asset)
+                if let assetName = tokenInfo["name"] {
+                    if assetName == "XCP" {
+                        assetType = "coin"
+                        assetData["type"] = "coin"
+                    } else {
+                        assetType = "token"
+                        assetData["type"] = "token"
+                    }
+                }
+                assetData = assetData.merging(tokenInfo, uniquingKeysWith: { (first, _) in first })
+            } catch {
+                print("failed to fetch info for token: \(item.asset)")
+            }
+            // NFT info?
+            do {
+                var nftInfo = try await self.nftExplorer.getNftInfo(contract: item.asset, tokenid:"")
+                if let nftImageUrl = nftInfo["nftImageUrl"] {
+                    if nftImageUrl != "" {
+                        assetType = "nft"
+                        assetData["type"] = "nft"
+                    }
+                }
+                assetData = assetData.merging(nftInfo, uniquingKeysWith: { (first, _) in first })
+            } catch {
+                print("failed to fetch infor for nft: \(item.asset)")
+            }
+            //assetList.append(assetData)
+            assetList[assetType]?.append(assetData)
+            print("assetType: \(assetType)")
+        }
+        print("assetList: \(assetList)")
+        return assetList
+    }
+    
+    @available(iOS 15.0.0, *)
+    public override func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
+        print("in XchainBlockExplorer getSimpleAssetList - addr: \(addr)")
+        
+        let urlString: String = self.getUrl() + "api/balances/" +  addr
+        guard let url = URL(string: urlString) else {
+            throw DataFetcherError.invalidURL
+        }
+        
+        // Use the async variant of URLSession to fetch data
+        let (data, _) = try await URLSession.shared.data(from: url)
+        
+        // Parse the JSON data
+        let result = try JSONDecoder().decode(JsonResponseTokenBalance.self, from: data)
+        print("result: \(result)")
+        
+        var assetList: [[String:String]] = []
+        for item in result.data {
+            var assetData: [String:String] = [:]
+            assetData["balance"] = item.quantity
+            assetData["decimals"] = "0"
+            assetData["contract"] = item.asset
+            assetData["type"] = "token" //by default
+            assetList.append(assetData)
+        }
+        print("assetList: \(assetList)")
+        return assetList
+    }
+    
+//    @available(iOS 15.0.0, *)
+//    public override func getTokenList(addr: String) async throws -> [AssetInfo] {
+//        print("in XchainBlockExplorer getSimpleAssetList - addr: \(addr)")
+//
+//        let urlString: String = self.getUrl() + "api/balances/" +  addr
+//        guard let url = URL(string: urlString) else {
+//            throw DataFetcherError.invalidURL
+//        }
+//
+//        // Use the async variant of URLSession to fetch data
+//        let (data, _) = try await URLSession.shared.data(from: url)
+//
+//        // Parse the JSON data
+//        let result = try JSONDecoder().decode(JsonResponseTokenBalance.self, from: data)
+//        print("result: \(result)")
+//
+//        //var assetList: [String:[[String:String]]] = [:]
+//        var assetList: [AssetInfo] = []
+//
+//        for item in result.data {
+//            //var assetType: String = "token"
+//            var assetData: AssetInfo = AssetInfo()
+//            //assetData["asset"] = item.asset
+//            assetData.balance = BigInt(item.quantity) // string to BigInt?
+//            assetData.decimals = 0
+//            assetData.contract = item.asset
+//            assetData.type = AssetType.token // by default, will be updated later?
+//            assetList.append(assetData)
+//        }
+//        print("assetList: \(assetList)")
+//        return assetList
+//    }
     
     @available(iOS 15.0.0, *)
     public override func getTokenBalance(addr: String, contract: String) async throws -> Double {

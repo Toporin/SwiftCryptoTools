@@ -22,7 +22,7 @@ public class Litecoin: Bitcoin {
             wifPrefix = 0xb0
         }
         
-        //blockExplorer = Sochain(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
+        //blockExplorer = Sochain(coinSymbol: self.coinSymbol, apiKeys: apiKeys) // deprecated
         blockExplorer = Blockcypher(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
         priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }    
