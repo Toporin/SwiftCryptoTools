@@ -165,8 +165,10 @@ public class Rarible: NftExplorer {
         request.setValue(apikey, forHTTPHeaderField: "X-API-KEY")
         
         // Use the async variant of URLSession to fetch data
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, urlResponse) = try await URLSession.shared.data(for: request)
         print("data: \(data)")
+        //print("urlResponse: \(urlResponse)")
+        // todo: check status code 429: too many requests and handle it?
         
         // Parse the JSON data
         let result = try JSONDecoder().decode(NftList.self, from: data)

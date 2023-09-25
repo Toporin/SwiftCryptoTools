@@ -236,10 +236,15 @@ public class Ethplorer: BlockExplorer {
 //        //assetList["coin"]=[assetData]
 //        assetList["coin"]?.append(assetData)
         
+        // debug
+//        for token in EthTokenList.ethTokenInfoList {
+//            //print("\(token["address"]?.lowercased()),")
+//            print("\(token["address"]?.lowercased()) : \(token["address"]),")
+//        }
+        
         // other tokens: erc20, erc721 & erc1155 are all mixed
         // no tokenId are provided...
         for item in result.tokens ?? [] {
-            
             // token info
             var assetData: [String:String] = [:]
             assetData["type"] = "token" // by default
@@ -248,6 +253,9 @@ public class Ethplorer: BlockExplorer {
             assetData["symbol"] = item.tokenInfo.symbol
             assetData["decimals"] = item.tokenInfo.decimals ?? "0"
             assetData["balance"] = item.rawBalance
+            if let tokenContract = EthTokenList.ethTokenAddressList[item.tokenInfo.address.lowercased()]{
+                assetData["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/" + tokenContract + "/logo.png"
+            }
             // to get nft info, we use another method getNftList(addr: String, contract: String) from NftExplorer class
             assetList.append(assetData)
         }
@@ -335,6 +343,9 @@ public class Ethplorer: BlockExplorer {
         tokenInfo["decimals"] = result.decimals
         tokenInfo["totalSupply"] = result.totalSupply
         tokenInfo["address"] = result.address
+        if let tokenContract = EthTokenList.ethTokenAddressList[contract.lowercased()]{
+            tokenInfo["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/" + tokenContract + "/logo.png"
+        }
         return tokenInfo
     }
     
