@@ -2,7 +2,9 @@ import Foundation
 import BigInt
 
 public class Counterparty: Bitcoin {
-
+    
+    public var priceExplorer2: PriceExplorer? = nil
+    
     public override init(isTestnet: Bool, apiKeys: [String: String]){
         super.init(isTestnet: isTestnet, apiKeys: apiKeys)
         
@@ -24,8 +26,28 @@ public class Counterparty: Bitcoin {
         blockExplorer = XchainBlockExplorer(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
         nftExplorer = XchainNftExplorer(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
         priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
+        
+        // backup
+        priceExplorer2 = Coingate(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }
-
+    
+    @available(iOS 15.0.0, *)
+    public override func getExchangeRateBetween(coin: String, otherCoin: String) async -> Double? {
+        // coingate and coingecko support different coin pairs...
+        if let rate = try? await priceExplorer?.getExchangeRateBetween(coin: coin, otherCoin: otherCoin) {
+            return rate
+        } else {
+            print("Counterparty getExchangeRateBetween error: no priceExplorer available")
+            if let rate = try? await priceExplorer2?.getExchangeRateBetween(coin: coin, otherCoin: otherCoin) {
+                return rate
+            } else {
+                print("Counterparty getExchangeRateBetween error: no priceExplorer2 available")
+                return nil
+            }
+        }
+    }
+    
+    // deprecated
     public override func contractBytesToString(contractBytes: [UInt8]) -> String {
         if let contractString = String(bytes: contractBytes, encoding: .utf8) {
             print("contractString: \(contractString)")

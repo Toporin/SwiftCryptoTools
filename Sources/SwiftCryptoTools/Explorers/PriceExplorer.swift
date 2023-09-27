@@ -16,6 +16,7 @@ public class PriceExplorer: BaseExplorer {
         super.init(coinSymbol: coinSymbol, apiKeys: apiKeys)
     }
     
+    //deprecated
     @available(iOS 15.0.0, *)
     public func getExchangeRateBetween(otherCoin: String) async throws -> Double {
         preconditionFailure("This method must be overridden")

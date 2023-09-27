@@ -27,7 +27,8 @@ public class Ethereum: BaseCoin {
         //blockExplorer = Etherscan(coinSymbol: coinSymbol, apiKeys: apiKeys)
         blockExplorer = Ethplorer(coinSymbol: coinSymbol, apiKeys: apiKeys)
         nftExplorer = Rarible(coinSymbol: self.coinSymbol, apiKeys: apiKeys) // opensea or rarible
-        priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
+        //priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
+        priceExplorer = Coingate(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }
     
     //****************************************

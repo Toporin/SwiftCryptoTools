@@ -36,9 +36,45 @@ public class Ethplorer: BlockExplorer {
         let decimals: String?
         let symbol: String
         let totalSupply: String
-        //"owner":"","lastUpdated":1602678250,"issuancesCount":0,"holdersCount":8717,"ethTransfersCount":0,"price":false
+        let price: PriceDataOrFalse
         enum CodingKeys: String, CodingKey {
-            case address, name, decimals, symbol, totalSupply
+            case address, name, decimals, symbol, totalSupply, price
+        }
+    }
+    
+    enum PriceDataOrFalse: Codable {
+        case bool(Bool)
+        case priceData(PriceData)
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let x = try? container.decode(Bool.self) {
+                self = .bool(x)
+                return
+            }
+            if let x = try? container.decode(PriceData.self) {
+                self = .priceData(x)
+                return
+            }
+            throw DecodingError.typeMismatch(PriceDataOrFalse.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for PriceDataOrFalse"))
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .bool(let x):
+                try container.encode(x)
+            case .priceData(let x):
+                try container.encode(x)
+            }
+        }
+    }
+
+    struct PriceData: Codable {
+        let rate: Double
+        let currency: String // in USD
+        enum CodingKeys: String, CodingKey {
+            case rate, currency
         }
     }
     
@@ -223,19 +259,6 @@ public class Ethplorer: BlockExplorer {
         
         var assetList: [[String:String]] = []
         
-        // ETH/BSC token
-        // we do not include native currency in the list
-        // for modularity, it is part of another request...
-//        var assetData: [String:String] = [:]
-//        assetData["type"] = "coin"
-//        assetData["name"] = self.getCoinName()
-//        assetData["symbol"] = self.coinSymbol
-//        assetData["balance"] = result.ETH.rawBalance
-//        assetData["decimals"] = "18"
-//        //assetList.append(assetData)
-//        //assetList["coin"]=[assetData]
-//        assetList["coin"]?.append(assetData)
-        
         // debug
 //        for token in EthTokenList.ethTokenInfoList {
 //            //print("\(token["address"]?.lowercased()),")
@@ -253,6 +276,16 @@ public class Ethplorer: BlockExplorer {
             assetData["symbol"] = item.tokenInfo.symbol
             assetData["decimals"] = item.tokenInfo.decimals ?? "0"
             assetData["balance"] = item.rawBalance
+            // exchange rate if known
+            let priceData = item.tokenInfo.price
+            switch priceData {
+            case .priceData(let data):
+                assetData["tokenExchangeRate"] = String(data.rate)
+                assetData["currencyForExchangeRate"] = data.currency
+            case .bool(_):
+                break
+            }
+            // if contract is known, fetch icon url from trustwallet CDN
             if let tokenContract = EthTokenList.ethTokenAddressList[item.tokenInfo.address.lowercased()]{
                 assetData["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/" + tokenContract + "/logo.png"
             }

@@ -231,6 +231,7 @@ public class BaseCoin {
     //*          PRICE EXPLORER METHODS            *
     //**********************************************
     
+    // deprecated
     @available(iOS 15.0.0, *)
     public func getExchangeRateBetween(otherCoin: String) async throws -> Double {
         if let rate = try await priceExplorer?.getExchangeRateBetween(otherCoin: otherCoin) {
@@ -238,6 +239,22 @@ public class BaseCoin {
             return rate
         } else {
             throw CoinError.FailedToGetExchangeRate
+        }
+    }
+    
+    @available(iOS 15.0.0, *)
+    public func getExchangeRateBetween(coin: String, otherCoin: String) async -> Double? {
+        do {
+            if let rate = try await priceExplorer?.getExchangeRateBetween(coin: coin, otherCoin: otherCoin) {
+                return rate
+            } else {
+                //throw CoinError.FailedToGetExchangeRate
+                print("getExchangeRateBetween error: no priceExplorer available")
+                return nil
+            }
+        } catch {
+            print("getExchangeRateBetween error: \(error)")
+            return nil
         }
     }
     

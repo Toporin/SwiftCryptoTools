@@ -12,20 +12,30 @@ public class XchainBlockExplorer: BlockExplorer {
     
     struct JsonResponseTokenBalance: Codable {
         let address: String
-        let data: [BalanceData]
+        let data: [AssetData]
         let total: UInt
         enum CodingKeys: String, CodingKey {
             case address, data, total
         }
     }
     
-    struct BalanceData: Codable {
+    struct AssetData: Codable {
         let asset: String
         let asset_longname: String
         let description: String
         let quantity: String
+        let estimated_value: ValueData
         enum CodingKeys: String, CodingKey {
-            case asset, asset_longname, description, quantity
+            case asset, asset_longname, description, quantity, estimated_value
+        }
+    }
+    
+    struct ValueData: Codable {
+        let xcp: String
+        let btc: String
+        let usd: String
+        enum CodingKeys: String, CodingKey {
+            case xcp, btc, usd
         }
     }
     
@@ -164,11 +174,29 @@ public class XchainBlockExplorer: BlockExplorer {
         
         var assetList: [[String:String]] = []
         for item in result.data {
+            // skip XCP as its not a token but the native 'coin' of counterparty
+            if item.asset == "XCP" {
+                continue
+            }
+            
             var assetData: [String:String] = [:]
             assetData["balance"] = item.quantity
             assetData["decimals"] = "0"
             assetData["contract"] = item.asset
+            assetData["name"] = item.asset
             assetData["type"] = "token" //by default
+            
+            // exchange rate
+            let valueData = item.estimated_value
+            let usdValueString = valueData.usd
+            if let usdValueDouble = Double(usdValueString),
+               let quantityDouble = Double(item.quantity) {
+                let exchangeRateDouble = usdValueDouble/quantityDouble
+                let exchangeRateString = String(exchangeRateDouble)
+                assetData["tokenExchangeRate"] = exchangeRateString
+                assetData["currencyForExchangeRate"] = "USD"
+            }
+            
             assetList.append(assetData)
         }
         print("assetList: \(assetList)")
