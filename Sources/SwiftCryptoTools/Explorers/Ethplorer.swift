@@ -14,7 +14,7 @@ public class Ethplorer: BlockExplorer {
     }
     
     struct CoinData: Codable {
-        let balance: Double // in eth/bsc
+        let balance: Double // in eth/bnb
         let rawBalance: String // in wei
         enum CodingKeys: String, CodingKey {
             case balance, rawBalance
@@ -88,7 +88,7 @@ public class Ethplorer: BlockExplorer {
     public func getUrl() -> String {
         if self.coinSymbol == "ETH" {
             return "https://api.ethplorer.io/"
-        } else if self.coinSymbol == "BSC"{
+        } else if self.coinSymbol == "BNB"{
             return "https://api.binplorer.com/"
         } else if self.coinSymbol == "tETH" {
             return "https://goerli-api.ethplorer.io/"
@@ -101,7 +101,7 @@ public class Ethplorer: BlockExplorer {
     public func getCoinName() -> String {
         if self.coinSymbol == "ETH" {
             return "Ethereum"
-        } else if self.coinSymbol == "BSC"{
+        } else if self.coinSymbol == "BNB"{
             return "BinanceSmartChain"
         } else if self.coinSymbol == "tETH" {
             return "Goerli testnet"
@@ -115,8 +115,8 @@ public class Ethplorer: BlockExplorer {
         let webUrl: String
         if (self.coinSymbol == "ETH"){
             webUrl = "https://ethplorer.io/address/" + addr
-        } else if (self.coinSymbol == "BSC") {
-            webUrl = "https://api.binplorer.com/address/" + addr
+        } else if (self.coinSymbol == "BNB") {
+            webUrl = "https://binplorer.com/address/" + addr
         } else {
             webUrl = "https://goerli.ethplorer.io/address/" + addr
         }
@@ -154,7 +154,8 @@ public class Ethplorer: BlockExplorer {
         
         return result.ETH.balance
     }
-
+    
+    // deprecated
     @available(iOS 15.0.0, *)
     public override func getAssetList(addr: String) async throws -> [String:[[String:String]]] {
         print("in Ethplorer getAssetList - addr: \(addr)")
@@ -185,7 +186,7 @@ public class Ethplorer: BlockExplorer {
         assetList["token"]=[]
         assetList["nft"]=[]
         
-        // ETH/BSC token
+        // ETH/BNB token
         var assetData: [String:String] = [:]
         assetData["type"] = "coin"
         assetData["name"] = self.getCoinName()
@@ -260,7 +261,7 @@ public class Ethplorer: BlockExplorer {
         var assetList: [[String:String]] = []
         
         // debug
-//        for token in EthTokenList.ethTokenInfoList {
+//        for token in TokenList.ethTokenInfoList {
 //            //print("\(token["address"]?.lowercased()),")
 //            print("\(token["address"]?.lowercased()) : \(token["address"]),")
 //        }
@@ -286,8 +287,12 @@ public class Ethplorer: BlockExplorer {
                 break
             }
             // if contract is known, fetch icon url from trustwallet CDN
-            if let tokenContract = EthTokenList.ethTokenAddressList[item.tokenInfo.address.lowercased()]{
+            if coinSymbol == "ETH",
+                let tokenContract = TokenList.ethTokenAddressList[item.tokenInfo.address.lowercased()]{
                 assetData["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/" + tokenContract + "/logo.png"
+            } else if coinSymbol == "BNB",
+                let tokenContract = TokenList.bscTokenAddressList[item.tokenInfo.address.lowercased()]{
+                assetData["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/smartchain/assets/" + tokenContract + "/logo.png"
             }
             // to get nft info, we use another method getNftList(addr: String, contract: String) from NftExplorer class
             assetList.append(assetData)
@@ -376,7 +381,11 @@ public class Ethplorer: BlockExplorer {
         tokenInfo["decimals"] = result.decimals
         tokenInfo["totalSupply"] = result.totalSupply
         tokenInfo["address"] = result.address
-        if let tokenContract = EthTokenList.ethTokenAddressList[contract.lowercased()]{
+        if coinSymbol == "ETH",
+            let tokenContract = TokenList.ethTokenAddressList[contract.lowercased()]{
+            tokenInfo["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/" + tokenContract + "/logo.png"
+        } else if coinSymbol == "BNB",
+            let tokenContract = TokenList.bscTokenAddressList[contract.lowercased()]{
             tokenInfo["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/ethereum/assets/" + tokenContract + "/logo.png"
         }
         return tokenInfo
