@@ -5,7 +5,7 @@ public class Ethplorer: BlockExplorer {
     // api doc: https://github.com/EverexIO/Ethplorer/wiki/Ethplorer-API
     
     struct JsonResponseAddrInfo: Codable {
-        let address: String
+        let address: String?
         let ETH: CoinData
         let tokens: [TokenData]?
         enum CodingKeys: String, CodingKey {
