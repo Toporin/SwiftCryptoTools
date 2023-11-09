@@ -152,8 +152,9 @@ public class Rarible: NftExplorer {
         let urlString: String = self.getUrl()
                                     + "nft/ownerships/byOwner?owner="
                                     + addr
-                                    + "&collection="
-                                    + contract
+        // TODO: Needs refactoring, contract seems to make the request fail and is not required
+        //                            + "&collection="
+        //                            + contract
         print("urlString: \(urlString)")
         
         guard let url = URL(string: urlString) else {
