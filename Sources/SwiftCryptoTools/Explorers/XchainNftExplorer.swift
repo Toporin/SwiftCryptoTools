@@ -9,10 +9,10 @@ public class XchainNftExplorer: NftExplorer {
         let description: String
         let divisible: Bool
         let locked: Bool
-        let supply: UInt64
+        //let supply: String //UInt64
         let type: String
         enum CodingKeys: String, CodingKey {
-            case asset, asset_longname, description, divisible, locked, supply, type
+            case asset, asset_longname, description, divisible, locked, type //supply
         }
     }
     
@@ -87,10 +87,10 @@ public class XchainNftExplorer: NftExplorer {
             
             let divisible = String(result.divisible)
             let locked = String(result.locked)
-            let supply = result.supply
+            //let supply = result.supply
             var descriptionTxt: String = "Divisible: \(divisible) \n" +
                                          "Locked: \(locked) \n" +
-                                         "Supply: \(supply) \n" +
+                                         //"Supply: \(supply) \n" +
                                          "Description: \(result.description)"
             nftInfo["nftDescription"] = descriptionTxt
             
