@@ -185,6 +185,7 @@ public class XchainBlockExplorer: BlockExplorer {
             assetData["contract"] = item.asset
             assetData["name"] = item.asset
             assetData["type"] = "token" //by default
+            assetData["tokenExplorerLink"] = getTokenWebLink(contract: item.asset)
             
             // exchange rate
             let valueData = item.estimated_value

@@ -38,9 +38,17 @@ public class Coingecko: PriceExplorer {
     //deprecated
     @available(iOS 15.0.0, *)
     public override func getExchangeRateBetween(otherCoin: String) async throws -> Double {
+        
+        if (self.coinSymbol == otherCoin){
+            return 1
+        } else if (self.isTestnet) {
+            return 0 // Testnet coins have no value
+        }
+        
         return try await getExchangeRateBetween(coin: self.coinSymbol, otherCoin: otherCoin)
     }
     
+    // TODO: should be a static method?
     @available(iOS 15.0.0, *)
     public override func getExchangeRateBetween(coin: String, otherCoin: String) async throws -> Double {
         print("Coingecko getExchangeRateBetween: \(coin) and \(otherCoin)")

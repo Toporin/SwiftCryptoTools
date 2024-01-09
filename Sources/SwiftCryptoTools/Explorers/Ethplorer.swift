@@ -114,7 +114,8 @@ public class Ethplorer: BlockExplorer {
         // https://ethplorer.io/address/{address}
         let webUrl: String
         if (self.coinSymbol == "ETH"){
-            webUrl = "https://ethplorer.io/address/" + addr
+            //webUrl = "https://ethplorer.io/address/" + addr
+            webUrl = "https://etherscan.io/address/"+addr
         } else if (self.coinSymbol == "BNB") {
             webUrl = "https://binplorer.com/address/" + addr
         } else {
@@ -277,6 +278,7 @@ public class Ethplorer: BlockExplorer {
             assetData["symbol"] = item.tokenInfo.symbol
             assetData["decimals"] = item.tokenInfo.decimals ?? "0"
             assetData["balance"] = item.rawBalance
+            assetData["tokenExplorerLink"] = getTokenWebLink(contract: item.tokenInfo.address)
             // exchange rate if known
             let priceData = item.tokenInfo.price
             switch priceData {
@@ -294,6 +296,8 @@ public class Ethplorer: BlockExplorer {
                 let tokenContract = TokenList.bscTokenAddressList[item.tokenInfo.address.lowercased()]{
                 assetData["tokenIconUrl"] = "https://assets-cdn.trustwallet.com/blockchains/smartchain/assets/" + tokenContract + "/logo.png"
             }
+            
+            
             // to get nft info, we use another method getNftList(addr: String, contract: String) from NftExplorer class
             assetList.append(assetData)
         }
