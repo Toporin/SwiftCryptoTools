@@ -19,6 +19,17 @@ public class BlockExplorer: BaseExplorer {
         preconditionFailure("This method must be overridden")
     }
     
+    // returns detailed list of data about each asset held in a given address
+    @available(iOS 15.0.0, *)
+    public func getAssetList(addr: String) async throws -> [String:[[String:String]]] {
+        preconditionFailure("This method must be overridden")
+    }
+    
+    // returns basic list of data about each asset held in a given address
+    @available(iOS 15.0.0, *)
+    public func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
+        preconditionFailure("This method must be overridden")
+    }
     
     @available(iOS 15.0.0, *)
     public func getTokenBalance(addr: String, contract: String) async throws -> Double {
@@ -27,6 +38,11 @@ public class BlockExplorer: BaseExplorer {
     
     @available(iOS 15.0.0, *)
     public func getTokenInfo(contract: String) async throws -> [String:String] {
+        preconditionFailure("This method must be overridden")
+    }
+    
+    @available(iOS 15.0.0, *)
+    public func getTxInfo(txHash: String, index: Int) async throws -> (script: String, value: UInt64) {
         preconditionFailure("This method must be overridden")
     }
     

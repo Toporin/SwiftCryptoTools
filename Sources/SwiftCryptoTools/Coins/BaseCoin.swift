@@ -2,7 +2,9 @@ import Foundation
 
 public enum CoinError: Error {
     case WrongPubkeySize(length: Int, expected: Int)
+    case UnsupportedCoinError
     case FailedToGetBalance
+    case FailedToGetAssetList
     case FailedToGetTokenBalance
     case FailedToGetTokenInfo
     case FailedToGetNftInfo
@@ -116,6 +118,33 @@ public class BaseCoin {
     }
     
     @available(iOS 15.0.0, *)
+    public func getAssetList(addr: String) async throws -> [String : [[String : String]]] {
+        if let assetList = try await blockExplorer?.getAssetList(addr: addr){
+            return assetList
+        } else {
+            //throw CoinError.FailedToGetAssetList
+            var assetList: [String:[[String:String]]] = [:]
+            return assetList
+        }
+    }
+    
+    @available(iOS 15.0.0, *)
+    public func getSimpleAssetList(addr: String) async -> [[String:String]] {
+        do{
+            if let assetList = try await blockExplorer?.getSimpleAssetList(addr: addr){
+                return assetList
+            } else {
+                let assetList: [[String:String]] = []
+                return assetList
+            }
+        } catch {
+            print("getSimpleAssetList error: \(error)")
+            let assetList: [[String:String]] = []
+            return assetList
+        }
+    }
+    
+    @available(iOS 15.0.0, *)
     public func getTokenBalance(addr: String, contract: String) async throws -> Double {
         if let balance = try await blockExplorer?.getTokenBalance(addr: addr, contract: contract){
             print ("tokenBalance: \(balance)")
@@ -179,10 +208,30 @@ public class BaseCoin {
         }
     }
     
+    //debug
+    @available(iOS 15.0.0, *)
+    public func getNftList(addr: String, contract: String) async -> [[String:String]] {
+        do {
+            if let nftList = try await nftExplorer?.getNftList(addr: addr, contract: contract){
+                print ("nftList: \(nftList)")
+                return nftList
+            } else {
+                print("getNftList: no NFT explorer available for \(self.displayName)")
+                let nftList: [[String:String]] = []
+                return nftList
+            }
+        } catch {
+            print("getNftList error: \(error)")
+            let nftList: [[String:String]] = []
+            return nftList
+        }
+    }
+    
     //**********************************************
     //*          PRICE EXPLORER METHODS            *
     //**********************************************
     
+    // deprecated
     @available(iOS 15.0.0, *)
     public func getExchangeRateBetween(otherCoin: String) async throws -> Double {
         if let rate = try await priceExplorer?.getExchangeRateBetween(otherCoin: otherCoin) {
@@ -190,6 +239,22 @@ public class BaseCoin {
             return rate
         } else {
             throw CoinError.FailedToGetExchangeRate
+        }
+    }
+    
+    @available(iOS 15.0.0, *)
+    public func getExchangeRateBetween(coin: String, otherCoin: String) async -> Double? {
+        do {
+            if let rate = try await priceExplorer?.getExchangeRateBetween(coin: coin, otherCoin: otherCoin) {
+                return rate
+            } else {
+                //throw CoinError.FailedToGetExchangeRate
+                print("getExchangeRateBetween error: no priceExplorer available")
+                return nil
+            }
+        } catch {
+            print("getExchangeRateBetween error: \(error)")
+            return nil
         }
     }
     

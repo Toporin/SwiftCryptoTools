@@ -9,10 +9,10 @@ public class XchainNftExplorer: NftExplorer {
         let description: String
         let divisible: Bool
         let locked: Bool
-        let supply: UInt64
+        //let supply: String //UInt64
         let type: String
         enum CodingKeys: String, CodingKey {
-            case asset, asset_longname, description, divisible, locked, supply, type
+            case asset, asset_longname, description, divisible, locked, type //supply
         }
     }
     
@@ -47,12 +47,26 @@ public class XchainNftExplorer: NftExplorer {
     }
     
     @available(iOS 15.0.0, *)
+    public override func getNftList(addr: String, contract: String) async throws -> [[String:String]] {
+        // ignore tokenId for Counterparty
+        // we assume addr does possess the NFT assset, as provided by getAssetList(addr: String)
+        let nftInfo = try await self.getNftInfo(contract: contract, tokenid: "")
+        if nftInfo["nftImageUrl"] != nil{
+            return [nftInfo]
+        } else {
+            // only returns if nft...
+            return []
+        }
+    }
+    
+    @available(iOS 15.0.0, *)
     public override func getNftInfo(contract: String, tokenid: String) async throws -> [String:String] {
         
         var nftInfo: [String:String] = [:]
-        nftInfo["nftName"] = contract
-        nftInfo["nftDescription"] = ""
-        nftInfo["nftImageUrl"] = ""
+        nftInfo["name"] = contract
+        nftInfo["contract"] = contract
+        //nftInfo["nftDescription"] = ""
+        //nftInfo["nftImageUrl"] = ""
         nftInfo["nftExplorerLink"] = self.getNftWebLink(contract: contract, tokenid: "")
         
         // tokenid is not used...
@@ -73,10 +87,10 @@ public class XchainNftExplorer: NftExplorer {
             
             let divisible = String(result.divisible)
             let locked = String(result.locked)
-            let supply = result.supply
+            //let supply = result.supply
             var descriptionTxt: String = "Divisible: \(divisible) \n" +
                                          "Locked: \(locked) \n" +
-                                         "Supply: \(supply) \n" +
+                                         //"Supply: \(supply) \n" +
                                          "Description: \(result.description)"
             nftInfo["nftDescription"] = descriptionTxt
             
@@ -117,6 +131,9 @@ public class XchainNftExplorer: NftExplorer {
             }
         } catch {
             print("Error: \(error)")
+        }
+        if nftInfo["nftImageUrl"] != nil {
+            nftInfo["type"] = "nft"
         }
         return nftInfo
     }

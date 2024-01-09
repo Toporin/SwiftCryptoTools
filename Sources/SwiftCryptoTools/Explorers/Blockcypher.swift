@@ -59,6 +59,12 @@ public class Blockcypher: BlockExplorer {
         let balance: Double = Double(balanceInt)/Double(100_000_000)
         return balance
     }
-
+    
+    @available(iOS 15.0.0, *)
+    public override func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
+        // no token supported
+        return [[String:String]]()
+    }
+    
 }
 

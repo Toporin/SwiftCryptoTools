@@ -3,6 +3,7 @@ import Foundation
 // DEPRECATED
 // Sochain updated its API to v3, which requires an API key
 // Use BlockCypher instead
+// todo: upgrade to v3 if needed?
 public class Sochain: BlockExplorer {
     
     struct Data: Codable {
@@ -53,6 +54,12 @@ public class Sochain: BlockExplorer {
             throw DataFetcherError.missingData
         }
         return balance
+    }
+    
+    @available(iOS 15.0.0, *)
+    public override func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
+        // token not supported
+        return [[String:String]]()
     }
 }
 
