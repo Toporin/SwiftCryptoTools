@@ -133,6 +133,18 @@ public class Covalent: BlockExplorer {
             assetList.append(assetData)
         }
         print("assetList: \(assetList)")
+        
+        let covalentNFT = CovalentNFT(coinSymbol: self.coinSymbol, apiKeys: self.apiKeys)
+        
+        do {
+            let nftList = try await covalentNFT.getNftList(addr: addr, contract: "")
+            for nft in nftList {
+                assetList.append(nft)
+            }
+        } catch {
+            print("Error in getSimpleAssetList - CovalentNFT : \(error)")
+        }
+        
         return assetList
     }
     
