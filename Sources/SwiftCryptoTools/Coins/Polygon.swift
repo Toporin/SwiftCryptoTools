@@ -16,7 +16,7 @@ public class Polygon: Ethereum {
         super.init(isTestnet: isTestnet, apiKeys: apiKeys)
         
         if (isTestnet){
-            coinSymbol = "MATIC"
+            coinSymbol = "MUMBAI"
             displayName = "Matic Testnet"
             slip44 = 0x800003c6
         } else{
@@ -28,8 +28,7 @@ public class Polygon: Ethereum {
         supportToken = true
         supportNft = true
         blockExplorer = Covalent(coinSymbol: coinSymbol, apiKeys: apiKeys)
-        blockExplorer = Covale
-        nftExplorer = Rarible(coinSymbol: self.coinSymbol, apiKeys: apiKeys) // opensea or rarible
+        nftExplorer = CovalentNFT(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
         priceExplorer = Coingate(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
     }
     

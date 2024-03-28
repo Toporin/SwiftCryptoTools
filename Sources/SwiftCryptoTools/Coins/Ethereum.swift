@@ -27,7 +27,7 @@ public class Ethereum: BaseCoin {
         supportToken = true
         supportNft = true
         //blockExplorer = Etherscan(coinSymbol: coinSymbol, apiKeys: apiKeys)
-        blockExplorer = Ethplorer(coinSymbol: coinSymbol, apiKeys: apiKeys)
+        blockExplorer = Covalent(coinSymbol: "MATIC", apiKeys: apiKeys)// Ethplorer(coinSymbol: coinSymbol, apiKeys: apiKeys)
         nftExplorer = Rarible(coinSymbol: self.coinSymbol, apiKeys: apiKeys) // opensea or rarible
         //priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
         priceExplorer = Coingate(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)

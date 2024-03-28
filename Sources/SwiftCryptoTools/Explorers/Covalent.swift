@@ -12,95 +12,166 @@ public class Covalent: BlockExplorer {
     // main : matic-mainnet
     // test : matic-mumbai
     
-    func getBasicAuth(with apiKey: String) -> String {
+    func getBasicAuth(with apiKey: String) -> String? {
         let username = apiKey
         let password = ""
         let loginString = "\(username):\(password)"
 
         guard let loginData = loginString.data(using: String.Encoding.utf8) else {
-            return
+            return nil
         }
         let base64LoginString = loginData.base64EncodedString()
 
         return "Basic \(base64LoginString)"
     }
+    
+    func convertBalanceToDouble(balance: String, decimals: Int) -> Double? {
+        guard let balanceDecimal = Decimal(string: balance) else {
+            print("Error: Balance is not a valid number.")
+            return nil
+        }
+        
+        let divisor = Decimal(sign: .plus, exponent: -decimals, significand: 1)
+        let balanceDouble = (balanceDecimal * divisor) as NSDecimalNumber
+        return balanceDouble.doubleValue
+    }
+    
+    func getChain(from coinSymbol: String) -> String {
+        switch coinSymbol {
+        case "MATIC":
+            return "matic-mainnet"
+        case "MUMBAI":
+            return "matic-mumbai"
+        default:
+            return "matic-mainnet"
+        }
+    }
         
     public override init(coinSymbol: String, apiKeys: [String: String]){
         super.init(coinSymbol: coinSymbol, apiKeys: apiKeys)
-        self.url = "https://api.covalenthq.com/v1/"
-        self.apiKey = apiKeys
     }
     
-    public func getAddressWebLink(addr: String) -> String {
+    public override func getAddressWebLink(addr: String) -> String {
         return "https://www.covalenthq.com/address/\(addr)/"
     }
     
-    public func getTokenWebLink(contract: String) -> String {
+    public override func getTokenWebLink(contract: String) -> String {
         return ""
-        //preconditionFailure("This method must be overridden")
     }
     
     @available(iOS 15.0.0, *)
-    public func getBalance(addr: String) async throws -> Double {
-        guard let url = URL(string: "https://api.covalenthq.com/v1/{chainName}/address/\(addr)/balances_native/") else {
+    public override func getBalance(addr: String) async throws -> Double {
+        guard let url = URL(string: "https://api.covalenthq.com/v1/\(self.getChain(from: self.coinSymbol))/address/\(addr)/balances_native/") else {
             return 0.0
         }
         let apikey: String = self.apiKeys["API_KEY_COVALENT"] ?? ""
         var request = URLRequest(url: url)
-        request.headers = ["Content-Type": "application/json"]
+        
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "GET"
-        request.setValue(self.getBasicAuth(with: apiKey), forHTTPHeaderField: "Authorization")
+        request.setValue(self.getBasicAuth(with: apikey), forHTTPHeaderField: "Authorization")
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let result = try JSONDecoder().decode(CovalentNativeBalance.self, from: data)
-        print("result: \(result)")
+        print("** result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
-        return result.items.first?.balance ?? 0.0
+        // convert result.items.first?.balance to Double
+        guard let balanceText = result.data.items.first?.balance,
+              let decimals = result.data.items.first?.contractDecimals,
+              let balanceResult = self.convertBalanceToDouble(balance: balanceText, decimals: decimals) else {
+            return 0.0
+        }
+        
+        print("** Fromatted balance : \(balanceResult)")
+        
+        return balanceResult
     }
     
     // returns detailed list of data about each asset held in a given address
     @available(iOS 15.0.0, *)
-    public func getAssetList(addr: String) async throws -> [String:[[String:String]]] {
+    public override func getAssetList(addr: String) async throws -> [String:[[String:String]]] {
         //preconditionFailure("This method must be overridden")
-        return []
+        return [:]
     }
     
     // returns basic list of data about each asset held in a given address
     @available(iOS 15.0.0, *)
-    public func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
-        // preconditionFailure("This method must be overridden")
-        return []
+    public override func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
+        print("in Covalent getSimpleAssetList - addr: \(addr)")
+        
+        let apikey: String = self.apiKeys["API_KEY_COVALENT"] ?? ""
+        
+        guard let url = URL(string: "https://api.covalenthq.com/v1/\(self.getChain(from: self.coinSymbol))/address/\(addr)/balances_v2/") else {
+            return []
+        }
+        
+        var request = URLRequest(url: url)
+        
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "GET"
+        request.setValue(self.getBasicAuth(with: apikey), forHTTPHeaderField: "Authorization")
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let result = try JSONDecoder().decode(CovalentTokenBalances.self, from: data)
+        print("** result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
+        
+        var assetList: [[String:String]] = []
+
+        for item in result.data.items ?? [] {
+            var assetData: [String:String] = [:]
+            
+            assetData["type"] = item.type
+            assetData["name"] = item.contractName
+            assetData["contract"] = item.contractAddress
+            assetData["symbol"] = item.contractTickerSymbol
+            assetData["decimals"] = item.contractDecimals.description
+            assetData["balance"] = item.balance
+            assetData["tokenExplorerLink"] = ""
+
+            assetList.append(assetData)
+        }
+        print("assetList: \(assetList)")
+        return assetList
     }
     
     @available(iOS 15.0.0, *)
-    public func getTokenBalance(addr: String, contract: String) async throws -> Double {
-        // preconditionFailure("This method must be overridden")
+    public override func getTokenBalance(addr: String, contract: String) async throws -> Double {
         return 10.0
     }
     
     @available(iOS 15.0.0, *)
-    public func getTokenInfo(contract: String) async throws -> [String:String] {
-        // preconditionFailure("This method must be overridden")
-        return []
+    public override func getTokenInfo(contract: String) async throws -> [String:String] {
+        return [:]
     }
     
     @available(iOS 15.0.0, *)
-    public func getTxInfo(txHash: String, index: Int) async throws -> (script: String, value: UInt64) {
-        // preconditionFailure("This method must be overridden")
+    public override func getTxInfo(txHash: String, index: Int) async throws -> (script: String, value: UInt64) {
         return ("", 0)
     }
-    
-    
-    
+
 }
 
 // MARK: - CovalentNativeBalance
 struct CovalentNativeBalance: Codable {
+    let data: DataClass
+    let error: Bool
+    let errorMessage, errorCode: JSONNull?
+
+    enum CodingKeys: String, CodingKey {
+        case data, error
+        case errorMessage = "error_message"
+        case errorCode = "error_code"
+    }
+}
+
+// MARK: - DataClass
+struct DataClass: Codable {
     let address, updatedAt, quoteCurrency: String
     let chainID: Int
     let chainName: String
-    let items: [Item]
+    let items: [NativeItem]
 
     enum CodingKeys: String, CodingKey {
         case address
@@ -113,7 +184,7 @@ struct CovalentNativeBalance: Codable {
 }
 
 // MARK: - Item
-struct Item: Codable {
+struct NativeItem: Codable {
     let contractDecimals: Int
     let contractName, contractTickerSymbol, contractAddress: String
     let supportsErc: [String]
@@ -140,6 +211,19 @@ struct Item: Codable {
 
 // MARK: - CovalentTokenBalances
 struct CovalentTokenBalances: Codable {
+    let data: TokenDataClass
+    let error: Bool
+    let errorMessage, errorCode: JSONNull?
+
+    enum CodingKeys: String, CodingKey {
+        case data, error
+        case errorMessage = "error_message"
+        case errorCode = "error_code"
+    }
+}
+
+// MARK: - DataClass
+struct TokenDataClass: Codable {
     let address, updatedAt, nextUpdateAt, quoteCurrency: String
     let chainID: Int
     let chainName: String
@@ -159,22 +243,20 @@ struct CovalentTokenBalances: Codable {
 
 // MARK: - Item
 struct Item: Codable {
-    let contractDecimals: Int?
-    let contractName, contractTickerSymbol: String?
-    let contractAddress: String
-    let supportsErc: [SupportsErc]
+    let contractDecimals: Int
+    let contractName, contractTickerSymbol, contractAddress: String
+    let supportsErc: [String]
     let logoURL: String
-    let contractDisplayName: String?
+    let contractDisplayName: String
     let logoUrls: LogoUrls
-    let lastTransferredAt: Date
     let nativeToken: Bool
-    let type: TypeEnum
+    let type: String
     let isSpam: Bool
     let balance, balance24H: String
-    let quoteRate, quoteRate24H, quote: Double?
-    let prettyQuote: String?
-    let quote24H: Double?
-    let prettyQuote24H: String?
+    let quoteRate, quoteRate24H, quote: Double
+    let prettyQuote: String
+    let quote24H: Double
+    let prettyQuote24H: String
     let protocolMetadata, nftData: JSONNull?
 
     enum CodingKeys: String, CodingKey {
@@ -186,7 +268,6 @@ struct Item: Codable {
         case logoURL = "logo_url"
         case contractDisplayName = "contract_display_name"
         case logoUrls = "logo_urls"
-        case lastTransferredAt = "last_transferred_at"
         case nativeToken = "native_token"
         case type
         case isSpam = "is_spam"
@@ -214,15 +295,6 @@ struct LogoUrls: Codable {
         case protocolLogoURL = "protocol_logo_url"
         case chainLogoURL = "chain_logo_url"
     }
-}
-
-enum SupportsErc: String, Codable {
-    case erc20 = "erc20"
-}
-
-enum TypeEnum: String, Codable {
-    case cryptocurrency = "cryptocurrency"
-    case dust = "dust"
 }
 
 // MARK: - Encode/decode helpers
