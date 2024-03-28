@@ -62,26 +62,31 @@ public class CovalentNFT: NftExplorer {
 
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        let result = try JSONDecoder().decode(CovalentTokenBalances.self, from: data)
-        print("** result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
+        print("** CovalentNFT - Data : \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
-        var assetList: [[String:String]] = []
+        var nftList: [[String:String]] = []
+        
+        do {
+            let result = try JSONDecoder().decode(CovalentNftsList.self, from: data)
+            for item in result.data.items ?? [] {
+                var nftInfo: [String:String] = [:]
+                
+                nftInfo["nftName"] = item.nftData.first?.externalData?.name ?? "Unknown"
+                nftInfo["nftDescription"] = item.nftData.first?.externalData?.description ?? "Unknown"
+                nftInfo["nftImageUrl"] = item.nftData.first?.externalData?.image1024 ?? "No image"
+                nftInfo["nftExplorerLink"] = item.nftData.first?.tokenURL ?? "No link"
+                nftInfo["contract"] = item.contractAddress
+                nftInfo["tokenid"] = item.nftData.first?.tokenID
+                nftInfo["balance"] = item.balance
 
-        for item in result.data.items ?? [] {
-            var assetData: [String:String] = [:]
-            
-            assetData["type"] = item.type
-            assetData["name"] = item.contractName
-            assetData["contract"] = item.contractAddress
-            assetData["symbol"] = item.contractTickerSymbol
-            assetData["decimals"] = item.contractDecimals.description
-            assetData["balance"] = item.balance
-            assetData["tokenExplorerLink"] = ""
-
-            assetList.append(assetData)
+                nftList.append(nftInfo)
+            }
+        } catch {
+            print("Error decoding JSON: \(error)")
         }
-        print("assetList: \(assetList)")
-        return assetList
+
+        print("nftList: \(nftList)")
+        return nftList
     }
     
 }
@@ -90,7 +95,7 @@ public class CovalentNFT: NftExplorer {
 struct CovalentNftsList: Codable {
     let data: NftDataClass
     let error: Bool
-    let errorMessage, errorCode: JSONNull?
+    let errorMessage, errorCode: NftJSONNull?
 
     enum CodingKeys: String, CodingKey {
         case data, error
@@ -113,15 +118,16 @@ struct NftDataClass: Codable {
 
 // MARK: - Item
 struct NftItem: Codable {
-    let contractName, contractTickerSymbol, contractAddress: String
-    let supportsErc: [String]
+    let contractName, contractTickerSymbol: String?
+    let contractAddress: String
+    let supportsErc: [SupportsErc]
     let isSpam: Bool
-    let balance, balance24H, type: String
-    let floorPriceQuote: Double
-    let prettyFloorPriceQuote: String
-    let floorPriceNativeQuote: Double
+    let balance, balance24H: String
+    let type: TypeEnum
+    let floorPriceQuote: Double?
+    let prettyFloorPriceQuote: String?
+    let floorPriceNativeQuote: Double?
     let nftData: [NftDatum]
-    let lastTransferedAt: Date
 
     enum CodingKeys: String, CodingKey {
         case contractName = "contract_name"
@@ -136,14 +142,16 @@ struct NftItem: Codable {
         case prettyFloorPriceQuote = "pretty_floor_price_quote"
         case floorPriceNativeQuote = "floor_price_native_quote"
         case nftData = "nft_data"
-        case lastTransferedAt = "last_transfered_at"
     }
 }
 
 // MARK: - NftDatum
 struct NftDatum: Codable {
     let tokenID: String
-    let tokenURL, originalOwner, currentOwner, externalData: JSONNull?
+    let tokenURL: String?
+    let originalOwner: String?
+    let currentOwner: JSONNull?
+    let externalData: ExternalData?
     let assetCached, imageCached: Bool
 
     enum CodingKeys: String, CodingKey {
@@ -154,5 +162,83 @@ struct NftDatum: Codable {
         case externalData = "external_data"
         case assetCached = "asset_cached"
         case imageCached = "image_cached"
+    }
+}
+
+// MARK: - ExternalData
+struct ExternalData: Codable {
+    let name, description: String?
+    let assetURL: String?
+    let assetFileExtension: String?
+    let assetMIMEType: String?
+    let assetSizeBytes: String?
+    let image: String?
+    let image256, image512, image1024: String?
+    let animationURL: String?
+    let externalURL: String?
+    let attributes: [Attribute]
+
+    enum CodingKeys: String, CodingKey {
+        case name, description
+        case assetURL = "asset_url"
+        case assetFileExtension = "asset_file_extension"
+        case assetMIMEType = "asset_mime_type"
+        case assetSizeBytes = "asset_size_bytes"
+        case image
+        case image256 = "image_256"
+        case image512 = "image_512"
+        case image1024 = "image_1024"
+        case animationURL = "animation_url"
+        case externalURL = "external_url"
+        case attributes
+    }
+}
+
+// MARK: - Attribute
+struct Attribute: Codable {
+    let traitType: String
+    let value: String
+
+    enum CodingKeys: String, CodingKey {
+        case traitType = "trait_type"
+        case value
+    }
+}
+
+enum SupportsErc: String, Codable {
+    case erc1155 = "erc1155"
+    case erc165 = "erc165"
+    case erc20 = "erc20"
+    case erc721 = "erc721"
+}
+
+enum TypeEnum: String, Codable {
+    case nft = "nft"
+}
+
+// MARK: - Encode/decode helpers
+
+class NftJSONNull: Codable, Hashable {
+
+    public static func == (lhs: NftJSONNull, rhs: NftJSONNull) -> Bool {
+        return true
+    }
+
+    public var hashValue: Int {
+        return 0
+    }
+
+    public init() {}
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if !container.decodeNil() {
+            throw DecodingError.typeMismatch(NftJSONNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for JSONNull"))
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encodeNil()
     }
 }

@@ -113,16 +113,16 @@ public class Covalent: BlockExplorer {
         request.setValue(self.getBasicAuth(with: apikey), forHTTPHeaderField: "Authorization")
 
         let (data, _) = try await URLSession.shared.data(for: request)
+        print("** result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
         let result = try JSONDecoder().decode(CovalentTokenBalances.self, from: data)
-        print("** result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
         var assetList: [[String:String]] = []
 
         for item in result.data.items ?? [] {
             var assetData: [String:String] = [:]
             
-            assetData["type"] = item.type
+            assetData["type"] = "token"
             assetData["name"] = item.contractName
             assetData["contract"] = item.contractAddress
             assetData["symbol"] = item.contractTickerSymbol
@@ -134,23 +134,12 @@ public class Covalent: BlockExplorer {
         }
         print("assetList: \(assetList)")
         
-        let covalentNFT = CovalentNFT(coinSymbol: self.coinSymbol, apiKeys: self.apiKeys)
-        
-        do {
-            let nftList = try await covalentNFT.getNftList(addr: addr, contract: "")
-            for nft in nftList {
-                assetList.append(nft)
-            }
-        } catch {
-            print("Error in getSimpleAssetList - CovalentNFT : \(error)")
-        }
-        
         return assetList
     }
     
     @available(iOS 15.0.0, *)
     public override func getTokenBalance(addr: String, contract: String) async throws -> Double {
-        return 10.0
+        return 0.0
     }
     
     @available(iOS 15.0.0, *)
@@ -203,8 +192,8 @@ struct NativeItem: Codable {
     let logoURL: String
     let blockHeight: Int
     let balance: String
-    let quoteRate, quote: Double
-    let prettyQuote: String
+    let quoteRate, quote: Double?
+    let prettyQuote: String?
 
     enum CodingKeys: String, CodingKey {
         case contractDecimals = "contract_decimals"
@@ -265,10 +254,10 @@ struct Item: Codable {
     let type: String
     let isSpam: Bool
     let balance, balance24H: String
-    let quoteRate, quoteRate24H, quote: Double
-    let prettyQuote: String
-    let quote24H: Double
-    let prettyQuote24H: String
+    let quoteRate, quoteRate24H, quote: Double?
+    let prettyQuote: String?
+    let quote24H: Double?
+    let prettyQuote24H: String?
     let protocolMetadata, nftData: JSONNull?
 
     enum CodingKeys: String, CodingKey {
