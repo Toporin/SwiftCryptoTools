@@ -52,11 +52,13 @@ public class Covalent: BlockExplorer {
     }
     
     public override func getAddressWebLink(addr: String) -> String {
-        return "https://www.covalenthq.com/address/\(addr)/"
+        //return "https://www.covalenthq.com/address/\(addr)/"
+        return "https://polygonscan.com/address/\(addr)"
     }
     
     public override func getTokenWebLink(contract: String) -> String {
-        return ""
+        //return ""
+        return "https://polygonscan.com/token/\(contract)"
     }
     
     @available(iOS 15.0.0, *)
@@ -120,7 +122,7 @@ public class Covalent: BlockExplorer {
         
         var assetList: [[String:String]] = []
 
-        for item in result.data.items ?? [] {
+        for item in result.data.items {
             // Do not add Matic token to avoid duplicate
             guard item.contractName != "Matic Token" else {
                 continue
@@ -134,7 +136,7 @@ public class Covalent: BlockExplorer {
             assetData["symbol"] = item.contractTickerSymbol
             assetData["decimals"] = item.contractDecimals.description
             assetData["balance"] = item.balance
-            assetData["tokenExplorerLink"] = ""
+            assetData["tokenExplorerLink"] = getTokenWebLink(contract: item.contractAddress)
             assetList.append(assetData)
         }
         print("Covalent getSimpleAssetList - assetList: \(assetList)")

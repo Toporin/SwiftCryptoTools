@@ -34,11 +34,12 @@ public class CovalentNFT: NftExplorer {
     }
     
     public override func getNftOwnerWebLink(addr: String) -> String {
-        return ""
+        return "https://rarible.com/user/\(addr)/owned"
     }
         
     public override func getNftWebLink(contract: String, tokenid: String) -> String {
-        return ""
+        //return "https://polygonscan.com/nft/\(contract)/\(tokenid)"
+        return "https://rarible.com/token/polygon/\(contract):\(tokenid)"
     }
     
     @available(iOS 15.0.0, *)
@@ -90,7 +91,7 @@ public class CovalentNFT: NftExplorer {
             nftInfo["name"] = item.externalData?.name ?? "Unknown"
             nftInfo["nftDescription"] = item.externalData?.description ?? "Unknown"
             nftInfo["nftImageUrl"] = item.externalData?.image1024 ?? "No image"
-            nftInfo["nftExplorerLink"] = "https://polygonscan.com/nft/\(contract)/\(item.tokenID)"
+            nftInfo["nftExplorerLink"] = getNftWebLink(contract: contract, tokenid: item.tokenID)
             nftInfo["tokenid"] = item.tokenID
             nftInfo["contract"] = contract
             nftInfo["balance"] = "1"
