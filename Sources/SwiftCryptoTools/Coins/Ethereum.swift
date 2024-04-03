@@ -2,8 +2,6 @@ import Foundation
 import CryptoSwift
 import BigInt
 
-// Polygon: Changer nom, slip44, blockExplorer
-
 public class Ethereum: BaseCoin {
     
    

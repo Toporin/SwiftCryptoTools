@@ -61,6 +61,7 @@ public class Covalent: BlockExplorer {
     
     @available(iOS 15.0.0, *)
     public override func getBalance(addr: String) async throws -> Double {
+        print("Covalent getBalance - addr: \(addr)")
         guard let url = URL(string: "https://api.covalenthq.com/v1/\(self.getChain(from: self.coinSymbol))/address/\(addr)/balances_native/") else {
             return 0.0
         }
@@ -74,7 +75,7 @@ public class Covalent: BlockExplorer {
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let result = try JSONDecoder().decode(CovalentNativeBalance.self, from: data)
-        print("** result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
+        print("Covalent getBalance - result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
         // convert result.items.first?.balance to Double
         guard let balanceText = result.data.items.first?.balance,
@@ -83,7 +84,7 @@ public class Covalent: BlockExplorer {
             return 0.0
         }
         
-        print("** Fromatted balance : \(balanceResult)")
+        print("Covalent getBalance - balance : \(balanceResult)")
         
         return balanceResult
     }
@@ -98,7 +99,7 @@ public class Covalent: BlockExplorer {
     // returns basic list of data about each asset held in a given address
     @available(iOS 15.0.0, *)
     public override func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
-        print("in Covalent getSimpleAssetList - addr: \(addr)")
+        print("Covalent getSimpleAssetList - addr: \(addr)")
         
         let apikey: String = self.apiKeys["API_KEY_COVALENT"] ?? ""
         
@@ -113,7 +114,7 @@ public class Covalent: BlockExplorer {
         request.setValue(self.getBasicAuth(with: apikey), forHTTPHeaderField: "Authorization")
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        print("** result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
+        print("Covalent getSimpleAssetList - result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
         let result = try JSONDecoder().decode(CovalentTokenBalances.self, from: data)
         
@@ -132,7 +133,7 @@ public class Covalent: BlockExplorer {
 
             assetList.append(assetData)
         }
-        print("assetList: \(assetList)")
+        print("Covalent getSimpleAssetList - assetList: \(assetList)")
         
         return assetList
     }
