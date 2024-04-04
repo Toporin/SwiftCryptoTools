@@ -50,6 +50,7 @@ public class CovalentNFT: NftExplorer {
     public override func getNftList(addr: String, contract: String) async throws -> [[String:String]] {
         let apikey: String = self.apiKeys["API_KEY_COVALENT"] ?? ""
         
+        //No-cache flag : ?with-uncached=true
         guard let url = URL(string: "https://api.covalenthq.com/v1/\(self.getChain(from: self.coinSymbol))/address/\(addr)/balances_nft/") else {
             return []
         }
@@ -59,7 +60,7 @@ public class CovalentNFT: NftExplorer {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "GET"
         request.setValue(self.getBasicAuth(with: apikey), forHTTPHeaderField: "Authorization")
-
+        
         let (data, _) = try await URLSession.shared.data(for: request)
         
         print("** CovalentNFT - Data : \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
@@ -69,26 +70,37 @@ public class CovalentNFT: NftExplorer {
         do {
             let result = try JSONDecoder().decode(CovalentNftsList.self, from: data)
             for item in result.data.items ?? [] {
-                var nftInfo: [String:String] = [:]
-                
-                nftInfo["nftName"] = item.nftData.first?.externalData?.name ?? "Unknown"
-                nftInfo["nftDescription"] = item.nftData.first?.externalData?.description ?? "Unknown"
-                nftInfo["nftImageUrl"] = item.nftData.first?.externalData?.image1024 ?? "No image"
-                nftInfo["nftExplorerLink"] = item.nftData.first?.tokenURL ?? "No link"
-                nftInfo["contract"] = item.contractAddress
-                nftInfo["tokenid"] = item.nftData.first?.tokenID
-                nftInfo["balance"] = item.balance
-
-                nftList.append(nftInfo)
+                let nftInfo = self.getAllNftsData(from: item.nftData, for: item.contractAddress)
+                nftList.append(contentsOf: nftInfo)
             }
         } catch {
             print("Error decoding JSON: \(error)")
         }
-
+        
         print("nftList: \(nftList)")
         return nftList
     }
     
+    private func getAllNftsData(from data: [NftDatum], for contract: String) -> [[String:String]] {
+        var nftData: [[String:String]] = []
+        
+        for item in data {
+            var nftInfo: [String:String] = [:]
+            
+            nftInfo["name"] = item.externalData?.name ?? "Unknown"
+            nftInfo["nftDescription"] = item.externalData?.description ?? "Unknown"
+            nftInfo["nftImageUrl"] = item.externalData?.image1024 ?? "No image"
+            nftInfo["nftExplorerLink"] = "https://polygonscan.com/nft/\(contract)/\(item.tokenID)"
+            nftInfo["tokenid"] = item.tokenID
+            nftInfo["contract"] = contract
+            nftInfo["balance"] = "1"
+            
+            nftData.append(nftInfo)
+        }
+        
+        nftData = Array(Set(nftData))
+        return nftData
+    }
 }
 
 // MARK: - CovalentNftsList
@@ -120,27 +132,14 @@ struct NftDataClass: Codable {
 struct NftItem: Codable {
     let contractName, contractTickerSymbol: String?
     let contractAddress: String
-    let supportsErc: [SupportsErc]
-    let isSpam: Bool
-    let balance, balance24H: String
-    let type: TypeEnum
-    let floorPriceQuote: Double?
-    let prettyFloorPriceQuote: String?
-    let floorPriceNativeQuote: Double?
+    let balance: String?
     let nftData: [NftDatum]
 
     enum CodingKeys: String, CodingKey {
         case contractName = "contract_name"
         case contractTickerSymbol = "contract_ticker_symbol"
         case contractAddress = "contract_address"
-        case supportsErc = "supports_erc"
-        case isSpam = "is_spam"
         case balance
-        case balance24H = "balance_24h"
-        case type
-        case floorPriceQuote = "floor_price_quote"
-        case prettyFloorPriceQuote = "pretty_floor_price_quote"
-        case floorPriceNativeQuote = "floor_price_native_quote"
         case nftData = "nft_data"
     }
 }
@@ -149,19 +148,13 @@ struct NftItem: Codable {
 struct NftDatum: Codable {
     let tokenID: String
     let tokenURL: String?
-    let originalOwner: String?
-    let currentOwner: JSONNull?
     let externalData: ExternalData?
-    let assetCached, imageCached: Bool
+    
 
     enum CodingKeys: String, CodingKey {
         case tokenID = "token_id"
         case tokenURL = "token_url"
-        case originalOwner = "original_owner"
-        case currentOwner = "current_owner"
         case externalData = "external_data"
-        case assetCached = "asset_cached"
-        case imageCached = "image_cached"
     }
 }
 
@@ -169,51 +162,13 @@ struct NftDatum: Codable {
 struct ExternalData: Codable {
     let name, description: String?
     let assetURL: String?
-    let assetFileExtension: String?
-    let assetMIMEType: String?
-    let assetSizeBytes: String?
-    let image: String?
-    let image256, image512, image1024: String?
-    let animationURL: String?
-    let externalURL: String?
-    let attributes: [Attribute]
+    let image1024: String?
 
     enum CodingKeys: String, CodingKey {
         case name, description
         case assetURL = "asset_url"
-        case assetFileExtension = "asset_file_extension"
-        case assetMIMEType = "asset_mime_type"
-        case assetSizeBytes = "asset_size_bytes"
-        case image
-        case image256 = "image_256"
-        case image512 = "image_512"
         case image1024 = "image_1024"
-        case animationURL = "animation_url"
-        case externalURL = "external_url"
-        case attributes
     }
-}
-
-// MARK: - Attribute
-struct Attribute: Codable {
-    let traitType: String
-    let value: String
-
-    enum CodingKeys: String, CodingKey {
-        case traitType = "trait_type"
-        case value
-    }
-}
-
-enum SupportsErc: String, Codable {
-    case erc1155 = "erc1155"
-    case erc165 = "erc165"
-    case erc20 = "erc20"
-    case erc721 = "erc721"
-}
-
-enum TypeEnum: String, Codable {
-    case nft = "nft"
 }
 
 // MARK: - Encode/decode helpers

@@ -121,6 +121,11 @@ public class Covalent: BlockExplorer {
         var assetList: [[String:String]] = []
 
         for item in result.data.items ?? [] {
+            // Do not add Matic token to avoid duplicate
+            guard item.contractName != "Matic Token" else {
+                continue
+            }
+            
             var assetData: [String:String] = [:]
             
             assetData["type"] = "token"
@@ -130,7 +135,6 @@ public class Covalent: BlockExplorer {
             assetData["decimals"] = item.contractDecimals.description
             assetData["balance"] = item.balance
             assetData["tokenExplorerLink"] = ""
-
             assetList.append(assetData)
         }
         print("Covalent getSimpleAssetList - assetList: \(assetList)")
