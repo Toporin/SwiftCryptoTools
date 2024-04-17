@@ -49,6 +49,8 @@ public class CovalentNFT: NftExplorer {
     
     @available(iOS 15.0.0, *)
     public override func getNftList(addr: String, contract: String) async throws -> [[String:String]] {
+        print("CovalentNFT getNftList - addr : \(addr) - contract: \(contract)")
+        
         let apikey: String = self.apiKeys["API_KEY_COVALENT"] ?? ""
         
         //No-cache flag : ?with-uncached=true
@@ -64,21 +66,21 @@ public class CovalentNFT: NftExplorer {
         
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        print("** CovalentNFT - Data : \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
+        print("CovalentNFT getNftList - Data : \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
         var nftList: [[String:String]] = []
         
         do {
             let result = try JSONDecoder().decode(CovalentNftsList.self, from: data)
-            for item in result.data.items ?? [] {
+            for item in result.data.items {
                 let nftInfo = self.getAllNftsData(from: item.nftData, for: item.contractAddress)
                 nftList.append(contentsOf: nftInfo)
             }
         } catch {
-            print("Error decoding JSON: \(error)")
+            print("CovalentNFT getNftList - Error decoding JSON: \(error)")
         }
         
-        print("nftList: \(nftList)")
+        print("CovalentNFT getNftList - nftList: \(nftList)")
         return nftList
     }
     

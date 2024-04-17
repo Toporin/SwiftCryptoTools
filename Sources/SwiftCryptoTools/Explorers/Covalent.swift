@@ -108,23 +108,34 @@ public class Covalent: BlockExplorer {
         guard let url = URL(string: "https://api.covalenthq.com/v1/\(self.getChain(from: self.coinSymbol))/address/\(addr)/balances_v2/") else {
             return []
         }
+        print("Covalent getSimpleAssetList - url: \(url)")
         
         var request = URLRequest(url: url)
-        
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "GET"
         request.setValue(self.getBasicAuth(with: apikey), forHTTPHeaderField: "Authorization")
 
         let (data, _) = try await URLSession.shared.data(for: request)
-        print("Covalent getSimpleAssetList - result: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
+        print("Covalent getSimpleAssetList - data: \(String(data: data, encoding: .utf8) ?? "NO-DATA")")
         
         let result = try JSONDecoder().decode(CovalentTokenBalances.self, from: data)
+        print("Covalent getSimpleAssetList - result: \(result)")
         
         var assetList: [[String:String]] = []
 
         for item in result.data.items {
             // Do not add Matic token to avoid duplicate
             guard item.contractName != "Matic Token" else {
+                continue
+            }
+            // for unknown reason, explorer sometimes returns token with 0 balance
+            guard item.balance != "0"  else {
+                continue
+            }
+            guard (item.contractName != nil) else {
+                continue
+            }
+            guard (!item.isSpam) else {
                 continue
             }
             
@@ -134,11 +145,20 @@ public class Covalent: BlockExplorer {
             assetData["name"] = item.contractName
             assetData["contract"] = item.contractAddress
             assetData["symbol"] = item.contractTickerSymbol
-            assetData["decimals"] = item.contractDecimals.description
+            assetData["decimals"] = item.contractDecimals?.description
             assetData["balance"] = item.balance
-            assetData["tokenExplorerLink"] = getTokenWebLink(contract: item.contractAddress)
+            assetData["tokenExplorerLink"] = getTokenWebLink(contract: item.contractAddress ?? "")
+            assetData["tokenIconUrl"] = item.logoURL
+            print("Covalent getSimpleAssetList - tokenIconUrl: \(item.logoURL)")
+            if let rate = item.quoteRate {
+                print("Covalent getSimpleAssetList - tokenExchangeRate: \(String(rate))")
+                print("Covalent getSimpleAssetList - currencyForExchangeRate: \(result.data.quoteCurrency)")
+                assetData["tokenExchangeRate"] = String(rate)
+                assetData["currencyForExchangeRate"] = result.data.quoteCurrency
+            }
             assetList.append(assetData)
         }
+        
         print("Covalent getSimpleAssetList - assetList: \(assetList)")
         
         return assetList
@@ -191,29 +211,29 @@ struct DataClass: Codable {
     }
 }
 
-// MARK: - Item
+// MARK: - NativeItem
 struct NativeItem: Codable {
     let contractDecimals: Int
     let contractName, contractTickerSymbol, contractAddress: String
-    let supportsErc: [String]
+    //let supportsErc: [String]
     let logoURL: String
-    let blockHeight: Int
+    //let blockHeight: Int
     let balance: String
     let quoteRate, quote: Double?
-    let prettyQuote: String?
+    //let prettyQuote: String?
 
     enum CodingKeys: String, CodingKey {
         case contractDecimals = "contract_decimals"
         case contractName = "contract_name"
         case contractTickerSymbol = "contract_ticker_symbol"
         case contractAddress = "contract_address"
-        case supportsErc = "supports_erc"
+        //case supportsErc = "supports_erc"
         case logoURL = "logo_url"
-        case blockHeight = "block_height"
+        //case blockHeight = "block_height"
         case balance
         case quoteRate = "quote_rate"
         case quote
-        case prettyQuote = "pretty_quote"
+        //case prettyQuote = "pretty_quote"
     }
 }
 
@@ -251,57 +271,44 @@ struct TokenDataClass: Codable {
 
 // MARK: - Item
 struct Item: Codable {
-    let contractDecimals: Int
-    let contractName, contractTickerSymbol, contractAddress: String
-    let supportsErc: [String]
-    let logoURL: String
-    let contractDisplayName: String
-    let logoUrls: LogoUrls
-    let nativeToken: Bool
-    let type: String
+    let contractDecimals: Int?
+    let contractName, contractTickerSymbol, contractAddress: String?
+    //let supportsErc: [String]
+    let logoURL: String?
+    let contractDisplayName: String?
+    //let logoUrls: LogoUrls
+    //let nativeToken: Bool
+    //let type: String
     let isSpam: Bool
     let balance, balance24H: String
-    let quoteRate, quoteRate24H, quote: Double?
-    let prettyQuote: String?
-    let quote24H: Double?
-    let prettyQuote24H: String?
-    let protocolMetadata, nftData: JSONNull?
+    let quoteRate, quoteRate24H, quote, quote24H: Double?
+    //let prettyQuote: String?
+    //let prettyQuote24H: String?
+    //let protocolMetadata: JSONNull?
+    //let nftData: JSONNull?
 
     enum CodingKeys: String, CodingKey {
         case contractDecimals = "contract_decimals"
         case contractName = "contract_name"
         case contractTickerSymbol = "contract_ticker_symbol"
         case contractAddress = "contract_address"
-        case supportsErc = "supports_erc"
+        //case supportsErc = "supports_erc"
         case logoURL = "logo_url"
         case contractDisplayName = "contract_display_name"
-        case logoUrls = "logo_urls"
-        case nativeToken = "native_token"
-        case type
+        //case logoUrls = "logo_urls"
+        //case nativeToken = "native_token"
+        //case type
         case isSpam = "is_spam"
         case balance
         case balance24H = "balance_24h"
         case quoteRate = "quote_rate"
         case quoteRate24H = "quote_rate_24h"
         case quote
-        case prettyQuote = "pretty_quote"
+        //case prettyQuote = "pretty_quote"
         case quote24H = "quote_24h"
-        case prettyQuote24H = "pretty_quote_24h"
-        case protocolMetadata = "protocol_metadata"
-        case nftData = "nft_data"
-    }
-}
-
-// MARK: - LogoUrls
-struct LogoUrls: Codable {
-    let tokenLogoURL: String
-    let protocolLogoURL: JSONNull?
-    let chainLogoURL: String
-
-    enum CodingKeys: String, CodingKey {
-        case tokenLogoURL = "token_logo_url"
-        case protocolLogoURL = "protocol_logo_url"
-        case chainLogoURL = "chain_logo_url"
+        //case prettyQuote24H = "pretty_quote_24h"
+        //case protocolMetadata = "protocol_metadata"
+        //case nftData = "nft_data"
     }
 }
 

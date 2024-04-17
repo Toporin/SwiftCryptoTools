@@ -76,11 +76,13 @@ public class Coingate: PriceExplorer {
         throw DataFetcherError.missingData
     }
     
+    // todo: remove (block explorer usually provide token exchange rate with native coin or usd)
     @available(iOS 15.0.0, *)
     public override func getTokenExchangeRateBetween(contract: String, otherCoin: String) async throws -> Double {
         return try await  getTokenExchangeRateBetween(coin: self.coinSymbol, contract: contract, otherCoin: otherCoin)
     }
     
+    // todo: remove (block explorer usually provide token exchange rate with native coin or usd)
     @available(iOS 15.0.0, *)
     public override func getTokenExchangeRateBetween(coin: String, contract: String, otherCoin: String) async throws -> Double {
         
