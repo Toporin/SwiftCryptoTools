@@ -258,13 +258,4 @@ public class BaseCoin {
         }
     }
     
-    @available(iOS 15.0.0, *)
-    public func getTokenExchangeRateBetween(contract: String, otherCoin: String) async throws -> Double {
-        if let rate = try await priceExplorer?.getTokenExchangeRateBetween(contract: contract, otherCoin: otherCoin) {
-            print ("rate: \(rate)")
-            return rate
-        } else {
-            throw CoinError.FailedToGetTokenExchangeRate
-        }
-    }
 }
