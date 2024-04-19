@@ -73,7 +73,7 @@ public class CovalentNFT: NftExplorer {
         do {
             let result = try JSONDecoder().decode(CovalentNftsList.self, from: data)
             for item in result.data.items {
-                let nftInfo = self.getAllNftsData(from: item.nftData, for: item.contractAddress)
+                let nftInfo = self.getAllNftsData(from: item)
                 nftList.append(contentsOf: nftInfo)
             }
         } catch {
@@ -84,20 +84,23 @@ public class CovalentNFT: NftExplorer {
         return nftList
     }
     
-    private func getAllNftsData(from data: [NftDatum], for contract: String) -> [[String:String]] {
+    private func getAllNftsData(from nftItem: NftItem) -> [[String:String]] {
         var nftData: [[String:String]] = []
         
-        for item in data {
+        for item in nftItem.nftData {
             var nftInfo: [String:String] = [:]
             
-            nftInfo["name"] = item.externalData?.name ?? "Unknown"
-            nftInfo["nftDescription"] = item.externalData?.description ?? "Unknown"
-            nftInfo["nftImageUrl"] = item.externalData?.image1024 ?? "No image"
-            nftInfo["nftExplorerLink"] = getNftWebLink(contract: contract, tokenid: item.tokenID)
+            nftInfo["name"] = item.externalData?.name ?? nftItem.contractName
+            nftInfo["nftDescription"] = item.externalData?.description ?? nftItem.contractAddress
+            nftInfo["nftImageUrl"] = item.externalData?.image ?? ""
+            nftInfo["nftExplorerLink"] = getNftWebLink(contract: nftItem.contractAddress, tokenid: item.tokenID)
             nftInfo["tokenid"] = item.tokenID
-            nftInfo["contract"] = contract
-            nftInfo["balance"] = "1"
-            
+            nftInfo["contract"] = nftItem.contractAddress
+            //nftInfo["balance"] = nftItem.balance // todo: improve
+            let balanceDouble = (Double(nftItem.balance ?? "0") ?? 0)/Double(nftItem.nftData.count)
+            let balanceString = (balanceDouble>0) ? String(balanceDouble) : ""
+            nftInfo["balance"] = balanceString
+            nftInfo["decimals"] = "0" // todo: improve
             nftData.append(nftInfo)
         }
         
@@ -165,12 +168,14 @@ struct NftDatum: Codable {
 struct ExternalData: Codable {
     let name, description: String?
     let assetURL: String?
-    let image1024: String?
-
+    let image: String?
+    //let image1024: String?
+    
     enum CodingKeys: String, CodingKey {
         case name, description
         case assetURL = "asset_url"
-        case image1024 = "image_1024"
+        case image
+        //case image1024 = "image_1024"
     }
 }
 
