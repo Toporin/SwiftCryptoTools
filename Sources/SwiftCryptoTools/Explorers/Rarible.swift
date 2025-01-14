@@ -87,7 +87,7 @@ public class Rarible: NftExplorer {
         let result = try JSONDecoder().decode(JsonResponseNftInfo.self, from: data)
         print("result: \(result)")
     
-        nftInfo["nftName"] = result.name
+        nftInfo["name"] = result.name
         nftInfo["nftDescription"] = result.description ?? ""
         nftInfo["nftExplorerLink"] = self.getNftWebLink(contract: contract, tokenid: tokenid)
         
@@ -182,6 +182,7 @@ public class Rarible: NftExplorer {
             nft["contract"] = nftRef.contract
             nft["tokenid"] = nftRef.tokenId
             nft["balance"] = nftRef.value // balance?
+            nft["decimals"] = "0"
             
             let nftInfo = try await getNftInfo(contract: nftRef.contract, tokenid: nftRef.tokenId)
             nft.merge(nftInfo, uniquingKeysWith: { (first, _) in first })

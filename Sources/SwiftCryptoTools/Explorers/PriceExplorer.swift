@@ -27,16 +27,6 @@ public class PriceExplorer: BaseExplorer {
         preconditionFailure("This method must be overridden")
     }
     
-    @available(iOS 15.0.0, *)
-    public func getTokenExchangeRateBetween(contract: String, otherCoin: String) async throws -> Double {
-        preconditionFailure("This method must be overridden")
-    }
-    
-    @available(iOS 15.0.0, *)
-    public func getTokenExchangeRateBetween(coin: String, contract: String, otherCoin: String) async throws -> Double {
-        preconditionFailure("This method must be overridden")
-    }
-    
     public func getPriceWeburl() -> String {
         preconditionFailure("This method must be overridden")
     }

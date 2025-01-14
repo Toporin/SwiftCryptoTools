@@ -237,7 +237,7 @@ public class Ethplorer: BlockExplorer {
     
     @available(iOS 15.0.0, *)
     public override func getSimpleAssetList(addr: String) async throws -> [[String:String]] {
-        print("in Ethplorer getSimpleAssetList - addr: \(addr)")
+        print("Ethplorer getSimpleAssetList - addr: \(addr)")
         
         //https://api.ethplorer.io/getAddressInfo/0x2Ff9d7c0b98E0DeC39bF15568fe0864967583C44?apiKey=freekey
         let apikey: String = self.apiKeys["API_KEY_ETHPLORER"] ?? ""
@@ -246,7 +246,7 @@ public class Ethplorer: BlockExplorer {
             + addr
             + "?apiKey="
             + apikey
-        print("urlString: \(urlString)")
+        print("Ethplorer getSimpleAssetList - urlString: \(urlString)")
         
         guard let url = URL(string: urlString) else {
             throw DataFetcherError.invalidURL
@@ -257,7 +257,7 @@ public class Ethplorer: BlockExplorer {
         
         // Parse the JSON data
         let result = try JSONDecoder().decode(JsonResponseAddrInfo.self, from: data)
-        print("result: \(result)")
+        print("Ethplorer getSimpleAssetList - result: \(result)")
         
         var assetList: [[String:String]] = []
         
@@ -301,13 +301,13 @@ public class Ethplorer: BlockExplorer {
             // to get nft info, we use another method getNftList(addr: String, contract: String) from NftExplorer class
             assetList.append(assetData)
         }
-        print("assetList: \(assetList)")
+        print("Ethplorer getSimpleAssetList - assetList: \(assetList)")
         return assetList
     }
     
     @available(iOS 15.0.0, *)
     public override func getTokenBalance(addr: String, contract: String) async throws -> Double {
-        print("in Ethplorer getTokenBalance - addr: \(addr)")
+        print("Ethplorer getTokenBalance - addr: \(addr)")
         /*
          https://api.ethplorer.io/getAddressInfo/0xff71cb760666ab06aa73f34995b42dd4b85ea07b?token=0xdac17f958d2ee523a2206206994597c13d831ec7&apiKey=freekey
          */
@@ -320,7 +320,7 @@ public class Ethplorer: BlockExplorer {
             + contract
             + "&apiKey="
             + apikey
-        print("urlString: \(urlString)")
+        print("Ethplorer getTokenBalance - urlString: \(urlString)")
         
         guard let url = URL(string: urlString) else {
             throw DataFetcherError.invalidURL
@@ -331,7 +331,7 @@ public class Ethplorer: BlockExplorer {
         
         // Parse the JSON data
         let result = try JSONDecoder().decode(JsonResponseAddrInfo.self, from: data)
-        print("result: \(result)")
+        print("Ethplorer getTokenBalance - result: \(result)")
         
         if let tokens = result.tokens {
             if tokens.count>=1 {
@@ -356,7 +356,7 @@ public class Ethplorer: BlockExplorer {
     
     @available(iOS 15.0.0, *)
     public override func getTokenInfo(contract: String) async throws -> [String : String] {
-        print("in Ethplorer getTokenInfo - contract: \(contract)")
+        print("Ethplorer getTokenInfo - contract: \(contract)")
         
         //https://github.com/EverexIO/Ethplorer/wiki/Ethplorer-API#get-token-info
         var tokenInfo: [String : String] = [:]
@@ -367,7 +367,7 @@ public class Ethplorer: BlockExplorer {
         let apikey = self.apiKeys["API_KEY_ETHPLORER"] ?? ""
         let baseUrl = "https://api.ethplorer.io"
         let urlString: String = baseUrl + "/getTokenInfo/" + contract + "?apiKey=" + apikey
-        print("urlString: \(urlString)")
+        print("Ethplorer getTokenInfo - urlString: \(urlString)")
         
         guard let url = URL(string: urlString) else {
             throw DataFetcherError.invalidURL
@@ -378,7 +378,7 @@ public class Ethplorer: BlockExplorer {
         
         // Parse the JSON data
         let result = try JSONDecoder().decode(TokenInfo.self, from: data)
-        print("result: \(result)")
+        print("Ethplorer getTokenInfo - result: \(result)")
         
         tokenInfo["name"] = result.name
         tokenInfo["symbol"] = result.symbol
