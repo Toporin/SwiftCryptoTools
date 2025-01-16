@@ -20,9 +20,8 @@ public class Coingate: PriceExplorer {
         return "https://api.coingate.com/v2/rates/merchant/"
     }
     
-    //deprecated
     @available(iOS 15.0.0, *)
-    public override func getExchangeRateBetween(otherCoin: String) async throws -> Double {
+    public override func getExchangeRateWith(otherCoin: String) async throws -> Double {
         return try await getExchangeRateBetween(coin: self.coinSymbol, otherCoin: otherCoin)
     }
     

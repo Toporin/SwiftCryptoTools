@@ -22,11 +22,14 @@ public class BinanceSmartChain: Ethereum {
             slip44 = 0x8000232e
         }
         
+        explorers = [BlockscoutExplorer(coin: self, apiKeys: apiKeys)]
+        priceExplorers = [Coingate(coin: self, apiKeys: apiKeys)]
+        
         supportToken = true
         supportNft = false
-        nftExplorer = nil // currently not supported
-        blockExplorer = Ethplorer(coinSymbol: coinSymbol, apiKeys: apiKeys)
-        priceExplorer = Coingate(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
+//        nftExplorer = nil // currently not supported
+//        blockExplorer = Ethplorer(coinSymbol: coinSymbol, apiKeys: apiKeys)
+//        priceExplorer = Coingate(coin: self, apiKeys: apiKeys)
     }
     
 }

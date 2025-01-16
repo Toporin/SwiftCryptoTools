@@ -13,8 +13,9 @@ public struct Version {
     // v0.1.0 initial version
     // v0.2.0 add asset listing support for a given address
     // v0.3.0 add Polygon network
+    // v0.4.0 simplify API, add blockscout explorer
     public static let SWIFTCRYPTOTOOLS_MAJOR_VERSION = 0
-    public static let SWIFTCRYPTOTOOLS_MINOR_VERSION = 3
+    public static let SWIFTCRYPTOTOOLS_MINOR_VERSION = 4
     public static let SWIFTCRYPTOTOOLS_REVISION = 0
     public static let SWIFTCRYPTOTOOLS_VERSION = String(SWIFTCRYPTOTOOLS_MAJOR_VERSION) + "." + String(SWIFTCRYPTOTOOLS_MINOR_VERSION) + "." + String(SWIFTCRYPTOTOOLS_REVISION)
 }

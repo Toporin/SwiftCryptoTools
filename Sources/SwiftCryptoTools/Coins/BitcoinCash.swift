@@ -33,8 +33,8 @@ public class BitcoinCash: Bitcoin {
             segwitHrp = "bc"
         }
         
-        blockExplorer = Fullstack(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
-        priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
+        explorers = [FullstackExplorer(coin: self, apiKeys: apiKeys)]
+        priceExplorers = [Coingate(coin: self, apiKeys: apiKeys), Coingecko(coin: self, apiKeys: apiKeys)]
     }
     
     //****************************************
