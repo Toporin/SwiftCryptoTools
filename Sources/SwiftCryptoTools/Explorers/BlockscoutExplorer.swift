@@ -73,6 +73,16 @@ public class BlockscoutExplorer: BlockchainExplorer {
     public override func getAssetList(addr: String) async throws -> [[String: String]] {
         print("In BlockscoutExplorer getAssetList for: \(addr)")
         
+        var assetList = try await getTokenList(addr: addr)
+        var nftList = try await getNftList(addr: addr)
+        assetList += nftList
+        return assetList
+    }
+    
+    @available(iOS 15.0, *)
+    public func getTokenList(addr: String) async throws -> [[String: String]] {
+        print("In BlockscoutExplorer getTokenList for: \(addr)")
+        
         var assetList = [[String:String]]()
         var assetListPartial = [[String:String]]()
              
@@ -80,10 +90,10 @@ public class BlockscoutExplorer: BlockchainExplorer {
         var next_page_params = ""
         repeat {
             
-            guard var url = URL(string: "\(getAPIURL())addresses/\(addr)/tokens\(next_page_params)") else {
+            guard var url = URL(string: "\(getAPIURL())addresses/\(addr)/tokens?type=ERC-20\(next_page_params)") else {
                 throw DataFetcherError.invalidURL
             }
-            print("In BlockscoutExplorer getAssetList url: \(url)")
+            print("In BlockscoutExplorer getTokenList url: \(url)")
             
             let (data, response) = try await URLSession.shared.data(from: url)
             
@@ -99,7 +109,46 @@ public class BlockscoutExplorer: BlockchainExplorer {
                 throw DataFetcherError.invalidURL
             }
             
-            (assetListPartial, next_page_params) = try parseAssetListJSON(data: data, addr: addr)
+            (assetListPartial, next_page_params) = try parseAssetListJSON(data: data, addr: addr, withHeader: false)
+            assetList += assetListPartial
+            //print("next_page_params: \(next_page_params)")
+            
+        } while (next_page_params != "")
+        
+        return assetList
+    }
+    
+    @available(iOS 15.0, *)
+    public func getNftList(addr: String) async throws -> [[String: String]] {
+        print("In BlockscoutExplorer getNftList for: \(addr)")
+        
+        var assetList = [[String:String]]()
+        var assetListPartial = [[String:String]]()
+             
+        // for pagination: https://docs.blockscout.com/devs/apis/rest
+        var next_page_params = ""
+        repeat {
+            
+            guard var url = URL(string: "\(getAPIURL())addresses/\(addr)/nft\(next_page_params)") else {
+                throw DataFetcherError.invalidURL
+            }
+            print("In BlockscoutExplorer getNftList url: \(url)")
+            
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw DataFetcherError.networkError(NSError(domain: "", code: -1))
+            }
+            
+            if httpResponse.statusCode == 404 {
+                return []
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                throw DataFetcherError.invalidURL
+            }
+            
+            (assetListPartial, next_page_params) = try parseAssetListJSON(data: data, addr: addr, withHeader: true)
             assetList += assetListPartial
             //print("next_page_params: \(next_page_params)")
             
@@ -153,7 +202,7 @@ public class BlockscoutExplorer: BlockchainExplorer {
         }
     }
     
-    private func parseAssetListJSON(data: Data, addr: String) throws -> ([[String: String]], String) {
+    private func parseAssetListJSON(data: Data, addr: String, withHeader: Bool) throws -> ([[String: String]], String) {
         do {
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let items = json["items"] as? [[String: Any]] else {
@@ -171,6 +220,9 @@ public class BlockscoutExplorer: BlockchainExplorer {
                 
                 if let name = token["name"] as? String {
                     asset["name"] = name
+                }
+                if let symbol = token["symbol"] as? String {
+                    asset["symbol"] = symbol
                 }
                 asset["contract"] = address
                 
@@ -190,10 +242,8 @@ public class BlockscoutExplorer: BlockchainExplorer {
                 
                 // Handle balance
                 if let value = item["value"] as? String {
-                    
                     let decimals = (token["decimals"] as? String) ?? "0"
                     let decimalCount = Int(decimals) ?? 0
-                    
                     let decimalPoint = value.count - decimalCount
                     if decimalPoint > 0 {
                         let idx = value.index(value.startIndex, offsetBy: decimalPoint)
@@ -210,15 +260,31 @@ public class BlockscoutExplorer: BlockchainExplorer {
                 }
                 
                 // Handle NFT specific data
-                if let tokenInstance = item["token_instance"] as? [String: Any] {
-                    if let tokenid = tokenInstance["id"] as? String {
-                        asset["tokenid"] = tokenid
-                        asset["nftExplorerLink"] = getNFTWebURL(contract: address, tokenid: tokenid)
+                if let image_url = item["image_url"] as? String {
+                    asset["nftImageUrl"] = image_url
+                }
+                if let tokenid = item["id"] as? String {
+                    asset["tokenid"] = tokenid
+                    asset["nftExplorerLink"] = getNFTWebURL(contract: address, tokenid: tokenid)
+                }
+                if let metadata = item["metadata"] as? [String: Any]{
+                    if let nftDescription = metadata["description"] as? String {
+                        asset["nftDescription"] = nftDescription
                     }
-                    if let imageUrl = tokenInstance["image_url"] as? String {
-                        asset["nftImageUrl"] = imageUrl
+                    if let nftName = metadata["name"] as? String {
+                        asset["nftName"] = nftName
                     }
                 }
+                
+//                if let tokenInstance = item["token_instance"] as? [String: Any] {
+//                    if let tokenid = tokenInstance["id"] as? String {
+//                        asset["tokenid"] = tokenid
+//                        asset["nftExplorerLink"] = getNFTWebURL(contract: address, tokenid: tokenid)
+//                    }
+//                    if let imageUrl = tokenInstance["image_url"] as? String {
+//                        asset["nftImageUrl"] = imageUrl
+//                    }
+//                }
                 
                 // Add explorer URLs
                 asset["tokenExplorerLink"] = getTokenWebURL(contract: address)
@@ -231,7 +297,7 @@ public class BlockscoutExplorer: BlockchainExplorer {
             var next_page_params = ""
             if let paginationDic = json["next_page_params"] as? [String: Any] {
                 //print("paginationDic: \(paginationDic)")
-                next_page_params = serializeQueryParameters(paginationDic)
+                next_page_params = serializeQueryParameters(paginationDic, withHeader: withHeader)
                 //print("serialized to next_page_params: \(next_page_params)")
             }
             
@@ -242,7 +308,7 @@ public class BlockscoutExplorer: BlockchainExplorer {
         }
     }
     
-    private func serializeQueryParameters(_ params: [String: Any?]?) -> String {
+    private func serializeQueryParameters(_ params: [String: Any?]?, withHeader: Bool) -> String {
         // serialize the pagination parameters into a string
         
         guard let params = params else {
@@ -272,7 +338,11 @@ public class BlockscoutExplorer: BlockchainExplorer {
         if queryString.isEmpty {
             return ""
         } else {
-            return "?" + queryString
+            if withHeader {
+                return "?" + queryString
+            } else {
+                return "&" + queryString
+            }
         }
     }
     
