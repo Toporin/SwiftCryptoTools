@@ -1,5 +1,6 @@
 import Foundation
 
+// required for CashAddrBech32
 public protocol BinaryConvertible {
     static func +(lhs: Data, rhs: Self) -> Data
     static func +=(lhs: inout Data, rhs: Self)

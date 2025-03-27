@@ -32,53 +32,6 @@ extension Collection where Element == Character {
     }
 }
 
-//extension String {
-//    func matches(regex: String) -> Bool {
-//        return self.range(of: regex, options: .regularExpression, range: nil, locale: nil) != nil
-//    }
-//}
-
-//extension String {
-//    func matches(regex: String) -> Bool {
-//        let regexObject = try! NSRegularExpression(pattern: regex)
-//        return regexObject.firstMatch(in: self, options: [], range: NSRange(location: 0, length: count)) != nil
-//    }
-//}
-
-extension String {
-    func matches(pattern: String) -> Bool {
-        //let pattern2 = #"^(0x)?[a-fA-F0-9]{40}$"# //#"^0x[a-fA-F0-9]{40}$"#
-        //print("pattern: \(pattern)")
-        //print("pattern2: \(pattern2)")
-        let regex = try! NSRegularExpression(pattern: pattern)
-        //let testString = self // #"0xeB7C917821796eb627C0719A23a139ce51226CD2"#
-        //print("String to eval: \(self)")
-        let stringRange = NSRange(location: 0, length: self.utf16.count)
-        let firstmatch = regex.firstMatch(in: self, range: stringRange)
-        //print("firstmatch: \(firstmatch)")
-        
-//        let matches = regex.matches(in: self, range: stringRange)
-//        print("matches: \(matches)")
-//        var result: [[String]] = []
-//        for match in matches {
-//            print("match: \(match)")
-//            var groups: [String] = []
-//            for rangeIndex in 1 ..< match.numberOfRanges {
-//                let nsRange = match.range(at: rangeIndex)
-//                guard !NSEqualRanges(nsRange, NSMakeRange(NSNotFound, 0)) else { continue }
-//                let string = (self as NSString).substring(with: nsRange)
-//                groups.append(string)
-//            }
-//            if !groups.isEmpty {
-//                result.append(groups)
-//            }
-//        }
-//        print("result: \(result)")
-//        return matches.count>0
-        return firstmatch != nil
-    }
-}
-
 class Util {
     static let shared = Util()
     

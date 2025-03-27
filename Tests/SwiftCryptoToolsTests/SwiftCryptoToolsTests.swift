@@ -390,7 +390,7 @@ final class SwiftCryptoToolsTests: XCTestCase {
                 print("WIF not supported => skipping test_WIF")
             }
             
-            let url = coin.getAddressWebLink(address: addr) ?? "unsupported"
+            let url = coin.getAddressWebLink(addr: addr) ?? "unsupported"
             print("URL= " + url)
         }
     }

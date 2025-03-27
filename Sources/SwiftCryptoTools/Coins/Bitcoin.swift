@@ -30,8 +30,8 @@ public class Bitcoin: BaseCoin {
             slip44 = 0x80000000
         }
         
-        blockExplorer = Blockstream(coinSymbol: coinSymbol, apiKeys: apiKeys)
-        priceExplorer = Coingecko(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
+        explorers = [BlockstreamExplorer(coin: self, apiKeys: apiKeys)]
+        priceExplorers = [Coingate(coin: self, apiKeys: apiKeys)]
     }
     
     //****************************************
@@ -133,13 +133,7 @@ public class Bitcoin: BaseCoin {
             addr = Base58.encodeChecked(version: UInt8(self.scriptMagicbyte), payload: scriptTrimmed)
         }
         return addr
-//        if (Array(script[..<3]) == "76a914".hexToBytes) && (Array(script[-2...]) == "88ac".hexToBytes) && script.count == 25 {}
-//        if script[:3] == b'\x76\xa9\x14' and script[-2:] == b'\x88\xac' and len(script) == 25:
-//                return bin_to_b58check(script[3:-2], self.magicbyte)  # pubkey hash addresses
-//        else:
-//                return bin_to_b58check(script[2:-1], self.script_magicbyte)
     }
-    
     
 }
 

@@ -17,18 +17,17 @@ public class Polygon: Ethereum {
         
         if (isTestnet){
             coinSymbol = "MUMBAI"
-            displayName = "Matic Testnet"
+            displayName = "Polygon Testnet"
             slip44 = 0x000003c6
         } else{
-            coinSymbol = "MATIC"
-            displayName = "Matic"
+            coinSymbol = "POL"
+            displayName = "Polygon"
             slip44 = 0x800003c6
         }
         
         supportToken = true
         supportNft = true
-        blockExplorer = Covalent(coinSymbol: coinSymbol, apiKeys: apiKeys)
-        nftExplorer = CovalentNFT(coinSymbol: self.coinSymbol, apiKeys: apiKeys)
-        priceExplorer = Coingate(coinSymbol: coinSymbol, isTestnet: isTestnet, apiKeys: apiKeys)
+        explorers = [BlockscoutExplorer(coin: self, apiKeys: apiKeys)]
+        priceExplorers = [Coingate(coin: self, apiKeys: apiKeys)]
     }
 }

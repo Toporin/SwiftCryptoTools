@@ -1,18 +1,5 @@
 import Foundation
 import CryptoSwift
-//import HsExtensions
-
-public extension HsExtension where Base == String {
-    var decodeBase58: Data {
-        Base58.decode(base)
-    }
-}
-
-public extension HsExtension where Base == Data {
-    var encodeBase58: String {
-        Base58.encode(base)
-    }
-}
 
 public struct Base58 {
     static let baseAlphabets = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"

@@ -9,16 +9,8 @@ import Foundation
 
 public class PriceExplorer: BaseExplorer {
     
-    public var isTestnet: Bool
-    
-    init(coinSymbol: String, isTestnet: Bool, apiKeys: [String:String]){
-        self.isTestnet = isTestnet
-        super.init(coinSymbol: coinSymbol, apiKeys: apiKeys)
-    }
-    
-    //deprecated
     @available(iOS 15.0.0, *)
-    public func getExchangeRateBetween(otherCoin: String) async throws -> Double {
+    public func getExchangeRateWith(otherCoin: String) async throws -> Double {
         preconditionFailure("This method must be overridden")
     }
     
